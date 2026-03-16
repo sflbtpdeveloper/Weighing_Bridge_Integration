@@ -1,0 +1,130 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" 
+xmlns:f="sap.ui.layout.form"
+xmlns:l="sap.ui.layout"
+xmlns:unified="sap.ui.unified"
+ controllerName="zmwbi.controller.Create">
+<Page id="Create" showFooter="true" showHeader="false" showNavButton="false">
+<content>
+
+<HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
+<Image src="/images/sfllogoonly.png" alt="Company Logo" densityAware="false" width="4rem"/>
+<VBox alignItems="Center" width="100%">
+<Title text="Sundram Fasteners Limited" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiMediumMarginTop"/>
+<Title text="Trip Creation" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiTinyMarginTop subTitle"/>
+</VBox>
+<HBox width="4rem"/>
+</HBox>
+<Toolbar>
+<ToolbarSpacer/>
+<Button text="SAVE" press="onSave" icon="sap-icon://save" type="Accept" enabled="{saveButtonModel>/isSaveEnabled}"/>
+</Toolbar>
+<!-- <Label text="Live Weight"/>
+<Input 
+    id="idLiveWeight"
+    value="{liveModel>/Weight}"
+    editable="false"
+    class="sapUiSmallMarginBottom"/> -->
+
+<VBox alignItems="Center" class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+
+<Text text="LIVE WEIGHT" class="sapUiSmallMarginBottom"/>
+
+<Text 
+    text="{liveModel>/Weight}" 
+    class="liveWeightText"/>
+
+<Button
+    text="Capture Weight"
+    type="Emphasized"
+    press="onCaptureWeight"
+    icon="sap-icon://download"/>
+
+</VBox>    
+<VBox class="sapUiSmallMargin">
+<f:SimpleForm id="SimpleFormChange456" editable="true" layout="ColumnLayout" columnsM="2" columnsL="2" columnsXL="3" title="Enter Weight (Header Details)" backgroundDesign="Translucent">
+<f:content>
+<Label text="Plant"/>
+<Input id="idWerk" value="{TRIPMODEL>/Plant}" editable="true"/>
+<Label text="Trip ID"/>
+<Input id="idTripid" value="{TRIPMODEL>/TripId}" editable="false">
+<layoutData>
+<l:GridData span="XL2 L1 M3 S4"/>
+</layoutData>
+</Input>
+<Label text="Truck Number"/>
+<Input id="idTrNo" value="{TRIPMODEL>/Truckno}" editable="true"/>
+<Label text="Supplier Code"/>
+<Input id="idSupcode" value="{TRIPMODEL>/Supcode}" editable="true"/>
+
+<Label text="Firstwgt"/>
+<Input id="idFW" value="{TRIPMODEL>/Firstwgt}" editable="false"/>
+
+<Label text="Second wgt"/>
+<Input id="idSW" value="{TRIPMODEL>/Secondwgt}" editable="false"/>
+<Label text="Unit"/>
+<Input id="idUnit" value="{TRIPMODEL>/Refunit}" change="onInvoiceQtyChange" required="false"/>
+
+</f:content>
+</f:SimpleForm>
+</VBox>
+
+<VBox class="sapUiSmallMargin">
+<Table
+    id="idItemTable"
+    items="{ItemModel>/results}"
+    growing="true"
+    growingThreshold="20"
+    headerText="Enter Weight (Item Details)">
+
+    <columns>
+
+        <Column>
+            <Text text="Serial No"/>
+        </Column>
+
+        <Column>
+            <Text text="Invoice No"/>
+        </Column>
+
+        <Column>
+            <Text text="Invoice Date"/>
+        </Column>
+        <Column>
+            <Text text="Purchase Order No"/>
+        </Column>
+        <Column>
+            <Text text="Purchase Order Item"/>
+        </Column>
+        <Column>
+            <Text text="Material"/>
+        </Column>  
+        <Column>
+            <Text text="Quantity/UOM"/>
+        </Column>                       
+    </columns>
+
+    <items>
+
+        <ColumnListItem>
+
+            <cells>
+
+                <Text text="{ItemModel>Sino}"/>
+                <Text text="{ItemModel>Invoiceno}"/>
+                <Text text="{ItemModel>Invoicedt}"/>
+                <Text text="{ItemModel>Pono}"/>
+                <Text text="{ItemModel>Poitem}"/>
+                <Text text="{ItemModel>Matnr}"/>
+                <ObjectIdentifier text="{ItemModel>Qty}" title="{ItemModel>UOM}"></ObjectIdentifier>
+
+            </cells>
+
+        </ColumnListItem>
+
+    </items>
+
+</Table>
+</VBox>
+</content>
+</Page>
+</mvc:View>

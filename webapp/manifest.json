@@ -1,0 +1,135 @@
+{
+  "_version": "1.48.0",
+  "sap.app": {
+    "id": "zmwbi",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.20.4",
+      "toolsId": "27b2f98f-9c5a-402b-b0c4-045c8210eadf"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZSB_MGATEWT_HDR/",
+        "type": "OData"
+      },
+      "ItemService": {
+        "uri": "/sap/opu/odata/sap/ZSB_MGATEWT_ITEM/",
+        "type": "OData"
+      },      
+      "LiveService": {
+        "uri": "/sap/opu/odata/sap/ZSB_MGATEWT_LIVE/",
+        "type": "OData"
+      }      
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.108.9",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "zmwbi.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true        
+      },
+      "liveModel": {
+        "dataSource": "LiveService",
+        "preload": true      
+      }       
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "zmwbi.view",
+        "controlAggregation": "pages",
+        "controlId": "App",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteApp",
+          "pattern": ":?query:",
+          "target": [
+            "TargetApp"
+          ]
+        },
+        {
+          "name": "Create",
+          "pattern": "Create",
+          "target": [
+            "CreateApp"
+          ]
+        }        
+      ],
+      "targets": {
+        "TargetApp": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "WgtHeader",
+          "viewName": "WgtHeader"
+        },
+        "CreateApp": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "WgtCreate",
+          "viewName": "Create"
+        }        
+      }
+    },
+    "rootView": {
+      "viewName": "zmwbi.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "4.0"
+metadata:
+  name: zmwbi
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          destination: SFLS4_ABAP
+          url: http://sfl4abap:443
+          client: '555'
+        app:
+          name: ZMWBI
+          description: Weighing Bridge Integration
+          package: Z001
+          transport: SFDK9Y0QE5
+        exclude:
+          - /test/

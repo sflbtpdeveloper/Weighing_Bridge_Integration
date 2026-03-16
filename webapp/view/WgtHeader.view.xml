@@ -1,0 +1,77 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="zmwbi.controller.WgtHeader">
+<Page id="List" showFooter="false" showHeader="false" showNavButton="true">
+<content>
+<HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
+<Image src="/images/sfllogoonly.png" alt="Company Logo" densityAware="false" width="4rem"/>
+<VBox alignItems="Center" width="100%">
+<Title text="Sundram Fasteners Limited" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiMediumMarginTop"/>
+<Title text="Weighing Bridge Report" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiTinyMarginTop subTitle"/>
+</VBox>
+<HBox width="4rem"/>
+</HBox>
+<Toolbar class="customToolbar">
+<SearchField id="searchFieldWerks" width="17.5rem" placeholder="Search by Plant" liveChange="onWerks"/>
+<SearchField id="searchFieldTrip" width="17.5rem" placeholder="Search by Trip Number" liveChange="onTrip"/>
+<SearchField id="searchFieldSupl" width="17.5rem" placeholder="Search by Supplier" liveChange="onSup"/>
+<ToolbarSpacer/>
+<Button text="Create" press="onButtonPress"/>
+</Toolbar>
+<!-- <ScrollContainer width="100%" height="100%" horizontal="true" vertical="true"> -->
+<Table id="myCustomTable" items="{path:'/ZC_MGATEWT_HDR'}" width="auto"
+  growing="true" growingThreshold="20" growingScrollToLoad="true" fixedLayout="false" 
+   class="sapUiMediumMarginTop  customTableHeader">
+<columns>
+<Column width="auto">
+<Text text="Plant"/>
+</Column>
+<Column width="auto">
+<Text text="Trip Id"/>
+</Column>
+<Column width="auto">
+<Text text="Truck Number"/>
+</Column>
+<Column width="auto">
+<Text text="Supplier Code"/>
+</Column>
+<Column width="auto">
+<Text text="First Weight/ Unit"/>
+</Column>
+<Column width="auto">
+<Text text="Second Weight / Unit"/>
+</Column>
+<Column width="auto">
+<Text text="Status"/>
+</Column>
+</columns>
+<items>
+<ColumnListItem type="Navigation" press="onRowPress">
+<cells>
+<ObjectIdentifier title="{Plant}"/>
+<VBox>
+<Text text="{TripId}" class="boldtext"/>
+</VBox>
+<VBox>
+<Text text="{Truckno}" class="boldtext"/>
+</VBox>
+<VBox>
+<Text text="{Supcode}" class="boldtext"/>
+</VBox>
+<VBox>
+<Text text="{Firstwgt}" class="boldtext"/>
+<ObjectIdentifier title="{Refunit}"/>
+</VBox>
+
+<VBox>
+<ObjectIdentifier title="{Secondwgt}"/>
+<ObjectIdentifier title="{Refunit}"/>
+</VBox>
+
+<Text text="{Status}" class="boldtext"/>
+</cells>
+</ColumnListItem>
+</items>
+</Table>
+<!-- </ScrollContainer> -->
+</content>
+</Page>
+</mvc:View>
