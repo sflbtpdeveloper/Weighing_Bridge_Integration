@@ -6,14 +6,14 @@ sap.ui.define([
 ], function (controller, MessageBox, WebSocket) {
     "use strict";
 
-    return controller.extend("zmwbi.controller.Create", {
+    return controller.extend("zmwbi.controller.Update", {
 
 
         onInit: function () {
             var that = this;
             var oModel = this.getOwnerComponent().getModel();
             this.oRouter = this.getOwnerComponent().getRouter();
-            this.oRouter.getRoute("Create").attachPatternMatched(this._onObjectMatched, this);
+            this.oRouter.getRoute("Update").attachPatternMatched(this._onObjectMatched, this);
 
             this._initScreen();
 
@@ -114,8 +114,6 @@ sap.ui.define([
             var sFirst = oTripModel.getProperty("/Firstwgt");
             var sSecond = oTripModel.getProperty("/Secondwgt");
 
-
-
             if (!sFirst) {
 
                 oTripModel.setProperty("/Firstwgt", sWeight);
@@ -124,15 +122,12 @@ sap.ui.define([
 
                 oTripModel.setProperty("/Secondwgt", sWeight);
 
-            var fFirst = parseFloat(sFirst) || 0;
-            var fSecond = parseFloat(sSecond) || 0;
-            var iNet = Math.abs(fFirst - fSecond);
                 // calculate net weight
-                //var iNet = parseFloat(sSecond) - parseFloat(sFirst);
+                var iNet = parseFloat(sSecond) - parseFloat(sFirst);
 
-                // if (iNet < 0) {
-                //     iNet = parseFloat(sFirst) - parseFloat(sSecond);
-                // }
+                if (iNet < 0) {
+                    iNet = parseFloat(sFirst) - parseFloat(sSecond);
+                }
 
                 oTripModel.setProperty("/Netwgt", iNet.toString());
             }
@@ -192,7 +187,7 @@ sap.ui.define([
             oModel.setProperty("/results", aData);
 
         },
-        onSave: function () {
+        onUpdate: function () {
             var that = this;
             var oHeader = this.getView().getModel("TRIPMODEL").getData();
             var aItems = this.getView().getModel("ItemModel").getData().results;
@@ -211,35 +206,92 @@ sap.ui.define([
 
             });
 
-
-            oHeader.to_wgtitem = oItems;
+            debugger;
+            //oHeader.to_wgtitem = oItems;
+            oHeader.ItemsJson = JSON.stringify(oItems);
 
             var oModel = this.getView().getModel(); // main OData model
+            var sPath = "/ZC_MGATEWT_HDR(Plant='" + sPlant + "',TripId='" + sTripId + "')";
 
-            oModel.create("/ZC_MGATEWT_HDR", oHeader, {
+            debugger;
 
-                success: function (oSuccess) {
-                    console.log(oSuccess);
-                    debugger;
-                    //this.getView().getModel().getData();   
-                    var oTripModel = this.getView().getModel("TRIPMODEL");
-
-                    // 🔥 Update TripId in model
-                    oTripModel.setProperty("/TripId", oSuccess.TripId);
-                    MessageBox.show("Trip ID Created Successfully - " + oSuccess.TripId);
-                }.bind(this),
-
+            oModel.callFunction("/updateWithItems", {
+                method: "POST",
+                urlParameters:{
+                    Plant: oHeader.Plant,
+                    TripId: oHeader.TripId,
+                    Truckno: oHeader.Truckno,
+                    Supcode: oHeader.Supcode,
+                    Firstwgt: oHeader.Firstwgt,
+                    Refunit: oHeader.Refunit,
+                    Firstwgtdate: oHeader.Firstwgtdate,
+                    Firstwgttime: oHeader.Firstwgttime,
+                    Secondwgt: oHeader.Secondwgt,
+                    Secondwgtdate: oHeader.Secondwgtdate,
+                    Secondwgttime: oHeader.Secondwgttime,
+                    Userid: oHeader.Userid,
+                    Status: oHeader.Status,
+                    Netwgt: oHeader.Netwgt    ,
+                    ItemsJson : oHeader.ItemsJson
+                },
+                success: function (oData,response) {
+                    sap.m.MessageToast.show("Updated Successfully");
+                },
                 error: function (oError) {
                     console.log(oError);
-                    sap.m.MessageToast.show("Error while saving");
                 }
-
             });
 
+            // oModel.callFunction("/updateWithItems", {
+            //     method: "POST",
+            //     urlParameters: {
+            //         Plant: oHeader.Plant,
+            //         TripId: oHeader.TripId,
+            //         Truckno: oHeader.Truckno,
+            //         Supcode: oHeader.Supcode,
+            //         Firstwgt: oHeader.Firstwgt,
+            //         Refunit: oHeader.Refunit,
+            //         Firstwgtdate: oHeader.Firstwgtdate,
+            //         Firstwgttime: oHeader.Firstwgttime,
+            //         Secondwgt: oHeader.Secondwgt,
+            //         Secondwgtdate: oHeader.Secondwgtdate,
+            //         Secondwgttime: oHeader.Secondwgttime,
+            //         Userid: oHeader.Userid,
+            //         Status: oHeader.Status,
+            //         Netwgt: oHeader.Netwgt                    
 
-        },
-        onVendorF4: function(){
-            
+            //     },
+
+            //     // IMPORTANT: pass deep payload manually
+            //     payload: oHeader,
+
+            //     success: function (oData) {
+            //         sap.m.MessageToast.show("Updated Successfully");
+            //     },
+            //     error: function (oError) {
+            //         console.log(oError);
+            //     }
+            // });
+            // oModel.update(sPath, oHeader, {
+
+            //     success: function (oSuccess) {
+            //         console.log(oSuccess);
+            //         debugger;
+            //         //this.getView().getModel().getData();   
+            //         var oTripModel = this.getView().getModel("TRIPMODEL");
+
+            //         // Update TripId in model                    
+            //         MessageBox.show("Trip ID Updated Successfully - " + oSuccess.TripId);
+            //     }.bind(this),
+
+            //     error: function (oError) {
+            //         console.log(oError);
+            //         sap.m.MessageToast.show("Error while Updating");
+            //     }
+
+            // });
+
+
         }
 
     });

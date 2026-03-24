@@ -1,23 +1,56 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="zmwbi.controller.WgtHeader">
-<Page id="List" showFooter="false" showHeader="false" showNavButton="true">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="zmwbi.controller.WgtHeader"
+xmlns:html="http://www.w3.org/1999/xhtml">
+<Page id="List" showFooter="false" showHeader="false" showNavButton="true"
+class="sapUiNoContentPadding" >
 <content>
-<HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
+<!-- <HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
 <Image src="/images/sfllogoonly.png" alt="Company Logo" densityAware="false" width="4rem"/>
 <VBox alignItems="Center" width="100%">
 <Title text="Sundram Fasteners Limited" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiMediumMarginTop"/>
 <Title text="Weighing Bridge Report" textAlign="Center" titleStyle="Auto" class="sapUiTinyMarginBegin sapUiTinyMarginTop subTitle"/>
 </VBox>
 <HBox width="4rem"/>
-</HBox>
+</HBox> -->
+
+<!-- <html:div class="bgImageInline" /> -->
+                <!-- <VBox class="videoOverlay"> -->
+                    <HBox
+                        class="videoHeader"
+                        alignItems="Center"
+                        justifyContent="SpaceBetween"
+                    >
+                        <HBox
+                            alignItems="Center"
+                            justifyContent="Start"
+                            class="headerLeft sapUiNoMargin sapUiNoPadding"
+                        >
+                            <Image
+                                src="../images/sfllogoonly.png"
+                                width="3rem"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <VBox class="headerTextBox sapUiTinyMarginBegin">
+                                <Title
+                                    text="SUNDRAM FASTENERS LIMITED"
+                                    class="videoHeaderTitle"
+                                />
+                                <Text
+                                    text="Weigh Bridge Integration"
+                                    class="videoHeaderSubTitle"
+                                />
+                            </VBox>
+                        </HBox>
+                    </HBox>
 <Toolbar class="customToolbar">
 <SearchField id="searchFieldWerks" width="17.5rem" placeholder="Search by Plant" liveChange="onWerks"/>
 <SearchField id="searchFieldTrip" width="17.5rem" placeholder="Search by Trip Number" liveChange="onTrip"/>
 <SearchField id="searchFieldSupl" width="17.5rem" placeholder="Search by Supplier" liveChange="onSup"/>
 <ToolbarSpacer/>
-<Button text="Create" press="onButtonPress"/>
+<!-- <Button text="Create" press="onButtonPress"/> -->
 </Toolbar>
 <!-- <ScrollContainer width="100%" height="100%" horizontal="true" vertical="true"> -->
-<Table id="myCustomTable" items="{path:'/ZC_MGATEWT_HDR'}" width="auto"
+<!-- {path:'/ZC_MGATEWT_HDR'} -->
+<Table id="myCustomTable" items="{TABLEMODEL>/items}" width="auto"  
   growing="true" growingThreshold="20" growingScrollToLoad="true" fixedLayout="false" 
    class="sapUiMediumMarginTop  customTableHeader">
 <columns>
@@ -46,31 +79,32 @@
 <items>
 <ColumnListItem type="Navigation" press="onRowPress">
 <cells>
-<ObjectIdentifier title="{Plant}"/>
+<ObjectIdentifier title="{TABLEMODEL>Plant}"/>
 <VBox>
-<Text text="{TripId}" class="boldtext"/>
+<Text text="{TABLEMODEL>TripId}" class="boldtext"/>
 </VBox>
 <VBox>
-<Text text="{Truckno}" class="boldtext"/>
+<Text text="{TABLEMODEL>Truckno}" class="boldtext"/>
 </VBox>
 <VBox>
-<Text text="{Supcode}" class="boldtext"/>
+<Text text="{TABLEMODEL>Supcode}" class="boldtext"/>
 </VBox>
 <VBox>
-<Text text="{Firstwgt}" class="boldtext"/>
-<ObjectIdentifier title="{Refunit}"/>
-</VBox>
-
-<VBox>
-<ObjectIdentifier title="{Secondwgt}"/>
-<ObjectIdentifier title="{Refunit}"/>
+<Text text="{TABLEMODEL>Firstwgt}" class="boldtext"/>
+<ObjectIdentifier title="{TABLEMODEL>Refunit}"/>
 </VBox>
 
-<Text text="{Status}" class="boldtext"/>
+<VBox>
+<ObjectIdentifier title="{TABLEMODEL>Secondwgt}"/>
+<ObjectIdentifier title="{TABLEMODEL>Refunit}"/>
+</VBox>
+
+<Text text="{TABLEMODEL>Status}" class="boldtext"/>
 </cells>
 </ColumnListItem>
 </items>
 </Table>
+<!-- </VBox> -->
 <!-- </ScrollContainer> -->
 </content>
 </Page>

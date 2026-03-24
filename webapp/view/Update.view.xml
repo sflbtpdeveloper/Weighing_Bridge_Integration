@@ -5,75 +5,70 @@
     xmlns:l="sap.ui.layout"
     xmlns:unified="sap.ui.unified"
     xmlns:core="sap.ui.core"
-    controllerName="zmwbi.controller.Create"
+    controllerName="zmwbi.controller.Update"
 >
     <Page
-        id="Create"
+        id="Update"
         showFooter="true"
         showHeader="false"
         showNavButton="false"
         class="sapUiNoContentPadding" 
     >
         <content>
-            <HBox
-                class="videoHeader"
-                alignItems="Center"
-                justifyContent="SpaceBetween"
-            >
-                <HBox
-                    alignItems="Center"
-                    justifyContent="Start"
-                    class="headerLeft sapUiNoMargin sapUiNoPadding"
-                >
-                    <Image
-                        src="../images/sfllogoonly.png"
-                        width="3rem"
-                        class="sapUiSmallMarginEnd"
-                    />
-                    <VBox class="headerTextBox sapUiTinyMarginBegin">
-                        <Title
-                            text="SUNDRAM FASTENERS LIMITED"
-                            class="videoHeaderTitle"
-                        />
-                        <Text
-                            text="Weigh Bridge Integration"
-                            class="videoHeaderSubTitle"
-                        />
-                    </VBox>
-                </HBox>
-            </HBox>
+ <HBox
+                        class="videoHeader"
+                        alignItems="Center"
+                        justifyContent="SpaceBetween"
+                    >
+                        <HBox
+                            alignItems="Center"
+                            justifyContent="Start"
+                            class="headerLeft sapUiNoMargin sapUiNoPadding"
+                        >
+                            <Image
+                                src="../images/sfllogoonly.png"
+                                width="3rem"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <VBox class="headerTextBox sapUiTinyMarginBegin">
+                                <Title
+                                    text="SUNDRAM FASTENERS LIMITED"
+                                    class="videoHeaderTitle"
+                                />
+                                <Text
+                                    text="Weigh Bridge Integration"
+                                    class="videoHeaderSubTitle"
+                                />
+                            </VBox>
+                        </HBox>
+                    </HBox>                    
             <Toolbar>
-                <HBox width="33%" />
+            <HBox width="33%" />
                 <HBox
                     width="34%"
                     justifyContent="Center"
                 >
                     <Title
-                        text="FIRST - WEIGHMENT ENTRY"
+                        text="SECOND - WEIGHMENT ENTRY"
                         textAlign="Center"
                         titleStyle="Auto"
                         class="sapUiTinyMarginBegin sapUiTinyMarginTop videoHeaderSubTitle"
-                    />
-                </HBox>
+                    />      
+             </HBox>
                 <HBox
                     width="33%"
                     justifyContent="End"
-                >
-                    <Button
-                        text="SAVE"
-                        press="onSave"
-                        icon="sap-icon://save"
-                        type="Accept"
-                        enabled="{saveButtonModel>/isSaveEnabled}"
-                    />
+                >     
+                <Button
+                    text="UPDATE"
+                    press="onUpdate"
+                    icon="sap-icon://save"
+                    type="Accept"
+                    enabled="{saveButtonModel>/isSaveEnabled}"
+                />
                 </HBox>
             </Toolbar>
-            <!-- <Label text="Live Weight"/>
-<Input 
-    id="idLiveWeight"
-    value="{liveModel>/Weight}"
-    editable="false"
-    class="sapUiSmallMarginBottom"/> -->
+            
 
             <VBox
                 alignItems="Center"
@@ -81,7 +76,7 @@
             >
                 <Text
                     text="LIVE WEIGHT"
-                    class="sapUiSmallMarginBottom subTitle"
+                    class="sapUiSmallMarginBottom"
                 />
 
                 <Text
@@ -141,15 +136,13 @@
                         <Input
                             id="idTrNo"
                             value="{TRIPMODEL>/Truckno}"
-                            editable="true"
+                            editable="false"
                         />
                         <Label text="Supplier Code" />
                         <Input
                             id="idSupcode"
                             value="{TRIPMODEL>/Supcode}"
                             editable="true"
-                            valueHelpRequest="onVendorF4"
-                            showValueHelp="true"
                         />
 
                         <Label text="First Weight" />
@@ -157,6 +150,7 @@
                             id="idFW"
                             value="{TRIPMODEL>/Firstwgt}"
                             editable="false"
+                            enabled="true"
                             class="weightGreen"
                         />
 
@@ -165,6 +159,7 @@
                             id="idSW"
                             value="{TRIPMODEL>/Secondwgt}"
                             editable="false"
+                            enabled="true"
                             class="weightGreen"
                         />
 

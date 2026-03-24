@@ -1,0 +1,108 @@
+<mvc:View
+    controllerName="zmwbi.controller.Start"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+>
+    
+        <Page            
+            showHeader="false"          
+            enableScrolling="false" 
+            class="sapUiNoContentPadding" 
+        >
+            <content>
+                <html:div class="bgImageInline" />
+                <VBox class="videoOverlay">
+                    <HBox
+                        class="videoHeader"
+                        alignItems="Center"
+                        justifyContent="SpaceBetween"
+                        width="100%"
+                    >
+                        <HBox
+                            alignItems="Center"
+                            justifyContent="Start"
+                            class="sapUiNoMargin sapUiNoPadding"
+                        >
+                            <Image
+                                src="images/sfllogoonly.png"
+                                width="3rem"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <VBox class="sapUiTinyMarginBegin">
+                                <Title
+                                    text="SUNDRAM FASTENERS LIMITED"
+                                    class="videoHeaderTitle"
+                                />
+                                <Text
+                                    text="Weigh Bridge Integration"
+                                    class="videoHeaderSubTitle"
+                                />
+                            </VBox>
+                        </HBox>
+                    </HBox>
+
+                    <VBox
+                        class="centerCardWrapper"
+                        alignItems="Center"
+                        justifyContent="Center"
+                    >
+                        <VBox class="centerEntryCard">
+                            <Title
+                                text="Weighment Entry"
+                                class="entryCardTitle"
+                            />
+                            <Text
+                                text="Enter Plant and Truck Number to Continue"
+                                class="entryCardSubTitle"
+                            />
+
+                            <VBox class="fieldBlock">
+                                <Label
+                                    text="Plant"
+                                    required="true"
+                                    class="fieldLabelWhiteBg"
+                                />
+                                <ComboBox
+                                    id="idsPlant"
+                                    width="100%"
+                                    placeholder="Select Plant"
+                                    selectedKey=""
+                                    items="{
+                                        path: '/plant'
+                                    }"
+                                >
+                                    <core:Item
+                                        key="{Plant}"
+                                        text="{Plant} - {PlantName}"
+                                    />
+                                </ComboBox>
+                            </VBox>
+
+                            <VBox class="fieldBlock">
+                                <Label
+                                    text="Truck Number"
+                                    required="true"
+                                    class="fieldLabelWhiteBg"
+                                />
+                                <Input
+                                    id="idsTruck"
+                                    width="100%"
+                                    placeholder="Enter Truck Number"
+                                    liveChange="onTruckLiveChange"
+                                />
+                            </VBox>
+
+                            <Button
+                                text="Submit"
+                                type="Emphasized"
+                                press="onVerify"
+                                class="entrySubmitBtn"
+                            />
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </content>
+        </Page>    
+</mvc:View>

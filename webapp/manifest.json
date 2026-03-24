@@ -93,9 +93,15 @@
         "clearControlAggregation": false
       },
       "routes": [
+
         {
-          "name": "RouteApp",
-          "pattern": ":?query:",
+          "name": "Start",
+          "pattern": "",
+          "target": "StartApp"
+        },        
+        {
+          "name": "Weigh",
+          "pattern": "Report",
           "target": [
             "TargetApp"
           ]
@@ -106,9 +112,22 @@
           "target": [
             "CreateApp"
           ]
-        }        
+        },
+        {
+          "name": "Update",
+          "pattern": "Update",
+          "target": [
+            "UpdateApp"
+          ]
+        }                 
       ],
       "targets": {
+                "StartApp": {
+          "viewType": "XML",
+          "viewId": "Start",
+          "viewName": "Start"
+        },
+
         "TargetApp": {
           "viewType": "XML",
           "transition": "slide",
@@ -122,7 +141,14 @@
           "clearControlAggregation": false,
           "viewId": "WgtCreate",
           "viewName": "Create"
-        }        
+        },
+        "UpdateApp": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "WgtUpdate",
+          "viewName": "Update"
+        }                 
       }
     },
     "rootView": {
