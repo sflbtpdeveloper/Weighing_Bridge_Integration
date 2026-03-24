@@ -1,0 +1,98 @@
+<mvc:View
+    controllerName="zmwbi.controller.Start"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+
+    <App id="startApp">
+        <Page id="startPage" showHeader="false" class="videoStartPage">
+
+            <content>
+
+                
+                <!-- <html:video
+                    class="bgVideo"
+                    autoplay="autoplay"
+                    muted="muted"
+                    loop="loop"
+                    playsinline="playsinline">
+                    <html:source src="/videos/Loop.mp4" type="video/mp4" />
+                </html:video> -->
+
+                <html:div class="bgImageInline"></html:div>
+
+           
+                <VBox class="videoOverlay">
+
+                
+                   <HBox class="videoHeader" alignItems="Center" justifyContent="SpaceBetween">
+
+
+<HBox
+    alignItems="Center"
+    justifyContent="Start"
+    class="headerLeft sapUiNoMargin sapUiNoPadding">
+
+
+<Image
+    src="/images/sfllogoonly.png"
+    class="videoHeaderLogo"
+    densityAware="false"/>
+
+<VBox class="headerTextBox sapUiTinyMarginBegin">
+    <Title text="SUNDRAM FASTENERS LIMITED" class="videoHeaderTitle" />
+        <Text text="Weigh Bridge Integration" class="videoHeaderSubTitle" />
+        </VBox>
+
+</HBox>
+
+    <!-- <Text text="Trip Verification" class="videoHeaderRightText" /> -->
+
+</HBox>
+                    <VBox class="centerCardWrapper" alignItems="Center" justifyContent="Center">
+                        <VBox class="centerEntryCard">
+
+                            <Title text="Weighment Entry" class="entryCardTitle" />
+                            <Text text="Enter plant and truck details to continue" class="entryCardSubTitle" />
+
+                            <VBox class="fieldBlock">
+                                <Label text="Plant" required="true" class="fieldLabelWhiteBg" />
+                                <ComboBox
+                                    id="idPlant"
+                                    width="100%"
+                                    placeholder="Select Plant"
+                                    selectedKey=""
+                                    items="{
+                                        path: '/plant'
+                                    }">
+                                    <core:Item
+                                        key="{Plant}"
+                                        text="{Plant} - {PlantName}" />
+                                </ComboBox>
+                            </VBox>
+
+                            <VBox class="fieldBlock">
+                                <Label text="Truck Number" required="true" class="fieldLabelWhiteBg" />
+                                <Input
+                                    id="idTruck"
+                                    width="100%"
+                                    placeholder="Enter Truck Number"
+                                    liveChange="onTruckLiveChange" />
+                            </VBox>
+
+                            <Button
+                                text="Submit"
+                                type="Emphasized"
+                                press="onVerify"
+                                class="entrySubmitBtn" />
+
+                        </VBox>
+                    </VBox>
+
+                </VBox>
+
+            </content>
+        </Page>
+    </App>
+</mvc:View>
