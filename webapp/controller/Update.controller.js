@@ -1,42 +1,79 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/m/MessageBox",
-    "sap/ui/core/ws/WebSocket"
-
-], function (controller, MessageBox, WebSocket) {
+    "sap/m/MessageToast",
+    "sap/ui/core/ws/WebSocket",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (Controller, MessageBox, MessageToast, WebSocket, JSONModel, Filter, FilterOperator) {
     "use strict";
 
-    return controller.extend("zmwbi.controller.Update", {
-
+    return Controller.extend("zmwbi.controller.Update", {
 
         onInit: function () {
-            var that = this;
-            var oModel = this.getOwnerComponent().getModel();
             this.oRouter = this.getOwnerComponent().getRouter();
             this.oRouter.getRoute("Update").attachPatternMatched(this._onObjectMatched, this);
 
+            this._setInitialModels();
+            this._initScreen();
+        },
+
+        _setInitialModels: function () {
+            this.getView().setModel(new JSONModel({
+                isSaveEnabled: true
+            }), "saveButtonModel");
+
+            this.getView().setModel(new JSONModel({
+                allPurchaseOrders: []
+            }), "poModel");
+
+            this.getView().setModel(new JSONModel({
+                results: []
+            }), "vendorModel");
+        },
+
+        _onObjectMatched: function () {
             this._initScreen();
 
-        },
-        _onObjectMatched: function () {
-            debugger;
-            //this._clearModels();    
-            this._initScreen();
             var oItemModel = this.getOwnerComponent().getModel("ItemModel");
             var oTripModel = this.getOwnerComponent().getModel("TRIPMODEL");
-            this.getView().setModel(oTripModel, "TRIPMODEL");
+
+            if (oTripModel) {
+                this.getView().setModel(oTripModel, "TRIPMODEL");
+            }
+
             if (oItemModel) {
-                this.byId("idItemTable").setModel(oItemModel, "ItemModel");
+                var aExistingRows = oItemModel.getProperty("/results") || [];
+                for (var i = 0; i < aExistingRows.length; i++) {
+                    if (!aExistingRows[i].poNoItems) {
+                        aExistingRows[i].poNoItems = [];
+                    }
+                    if (!aExistingRows[i].poItemItems) {
+                        aExistingRows[i].poItemItems = [];
+                    }
+                    if (!aExistingRows[i].materialItems) {
+                        aExistingRows[i].materialItems = [];
+                    }
+                }
+                oItemModel.setProperty("/results", aExistingRows);
+                this.getView().setModel(oItemModel, "ItemModel");
+            }
+
+            this._loadPurchaseOrders();
+
+            var sPlant = this.getView().getModel("TRIPMODEL").getProperty("/Plant");
+            if (sPlant) {
+                this._loadVendorsByPlant(sPlant);
             }
         },
+
         _initScreen: function () {
-            // Live model
-            var oLiveModel = new sap.ui.model.json.JSONModel({
+            var oLiveModel = new JSONModel({
                 Weight: "0.000"
             });
             this.getView().setModel(oLiveModel, "liveModel");
 
-            // WebSocket (avoid multiple connections ⚠️)
             if (!this.websocket) {
                 this.websocket = new WebSocket("/sap/bc/apc/sap/zapc_wb");
 
@@ -45,138 +82,410 @@ sap.ui.define([
                 });
 
                 this.websocket.attachMessage(function (oEvent) {
-                    const message = JSON.parse(oEvent.getParameter("data"));
-                    var oModel = this.getView().getModel("liveModel");
-                    oModel.setProperty("/Weight", message.Weight);
-
-                    sap.m.MessageToast.show("Weight Sent by " + message.Sender);
+                    try {
+                        var oMessage = JSON.parse(oEvent.getParameter("data"));
+                        this.getView().getModel("liveModel").setProperty("/Weight", oMessage.Weight);
+                        MessageToast.show("Weight Sent by " + oMessage.Sender);
+                    } catch (e) {
+                        console.error("WebSocket parse error", e);
+                    }
                 }.bind(this));
 
                 this.websocket.attachClose(function () {
-                    sap.m.MessageToast.show("Websocket connection is closed");
+                    MessageToast.show("Websocket connection is closed");
                 }.bind(this));
             }
 
             var oItemModel = this.getOwnerComponent().getModel("ItemModel");
-            debugger;
+
             if (oItemModel && oItemModel.getData() && oItemModel.getData().results && oItemModel.getData().results.length > 0) {
-                this.getOwnerComponent().setModel(oItemModel, "ItemModel");
+                this.getView().setModel(oItemModel, "ItemModel");
             } else {
-                // Table rows
                 var aRows = [];
                 for (var i = 1; i <= 3; i++) {
                     aRows.push(this._createEmptyRow(i));
                 }
 
-                var oEmptyModel = new sap.ui.model.json.JSONModel({
+                var oEmptyModel = new JSONModel({
                     results: aRows
                 });
+
                 this.getOwnerComponent().setModel(oEmptyModel, "ItemModel");
+                this.getView().setModel(oEmptyModel, "ItemModel");
             }
 
+            if (!this.getView().getModel("TRIPMODEL")) {
+                var oHeaderData = {
+                    Plant: "",
+                    TripId: "",
+                    Truckno: "",
+                    Supcode: "",
+                    Firstwgt: "",
+                    Secondwgt: "",
+                    Netwgt: "",
+                    Refunit: "",
+                    Status: "O",
+                    to_wgtitem: []
+                };
 
-            // Header model
-            var oHeaderData = {
-                Plant: "",
-                TripId: "",
-                Truckno: "",
-                Supcode: "",
-                Firstwgt: "",
-                Secondwgt: "",
-                Netwgt: "",
-                Refunit: "",
-                Status: "O",
-                to_wgtitem: []
-            };
-
-            var oHeaderModel = new sap.ui.model.json.JSONModel(oHeaderData);
-            this.getView().setModel(oHeaderModel, "TRIPMODEL");
-        },
-        _clearModels: function () {
-            var oItemModel = this.getView().getModel("ItemModel");
-            if (oItemModel) {
-                oItemModel.setData({ results: [] });
-            }
-
-            var oTripModel = this.getView().getModel("TRIPMODEL");
-            if (oTripModel) {
-                oTripModel.setData({});
+                this.getView().setModel(new JSONModel(oHeaderData), "TRIPMODEL");
             }
         },
-        onCaptureWeight: function (oEvent) {
-            debugger;
-            var oLiveModel = this.getView().getModel("liveModel");
 
-            var oTripModel = this.getView().getModel("TRIPMODEL");
-
-            var sWeight = oLiveModel.getProperty("/Weight");
-
-            var sFirst = oTripModel.getProperty("/Firstwgt");
-            var sSecond = oTripModel.getProperty("/Secondwgt");
-
-            if (!sFirst) {
-
-                oTripModel.setProperty("/Firstwgt", sWeight);
-
-            } else if (!sSecond) {
-
-                oTripModel.setProperty("/Secondwgt", sWeight);
-
-                // calculate net weight
-                var iNet = parseFloat(sSecond) - parseFloat(sFirst);
-
-                if (iNet < 0) {
-                    iNet = parseFloat(sFirst) - parseFloat(sSecond);
-                }
-
-                oTripModel.setProperty("/Netwgt", iNet.toString());
-            }
-            else {
-                sap.m.MessageToast.show("Both weights already captured");
-            }
-
-        },
-        onModelRefresh: function (e) {
-            debugger;
-        },
-        _createEmptyRow: function (sino) {
-
+        _createEmptyRow: function (iSno) {
             return {
-                Sino: sino,
+                Sino: iSno,
                 Invoiceno: "",
                 Invoicedt: "",
                 Pono: "",
                 Poitem: "",
                 Matnr: "",
-                Qty: ""
+                Qty: "",
+                poNoItems: [],
+                poItemItems: [],
+                materialItems: []
             };
-
         },
-        onFieldChange: function () {
 
+        _loadPurchaseOrders: function () {
+            var oMainModel = this.getOwnerComponent().getModel();
+
+            if (!oMainModel) {
+                MessageToast.show("Main OData model not available");
+                return;
+            }
+
+            oMainModel.read("/PurchaseOrders", {
+                success: function (oData) {
+                    var aResults = oData.results || [];
+                    this.getView().getModel("poModel").setProperty("/allPurchaseOrders", aResults);
+                    this._refreshAllRowDropdowns();
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error loading PurchaseOrders", oError);
+                    MessageToast.show("Failed to load Purchase Orders");
+                }
+            });
+        },
+
+        _loadVendorsByPlant: function (sPlant) {
+            var oMainModel = this.getOwnerComponent().getModel();
+
+            if (!oMainModel) {
+                MessageToast.show("Main OData model not available");
+                return;
+            }
+
+            if (!sPlant) {
+                this.getView().getModel("vendorModel").setProperty("/results", []);
+                return;
+            }
+
+            oMainModel.read("/vendorF4", {
+                filters: [
+                    new Filter("Plant", FilterOperator.EQ, sPlant)
+                ],
+                success: function (oData) {
+                    var aResults = oData.results || [];
+                    var oUnique = {};
+                    var aVendors = [];
+
+                    aResults.forEach(function (oItem) {
+                        if (oItem.Vendor && !oUnique[oItem.Vendor]) {
+                            oUnique[oItem.Vendor] = true;
+                            aVendors.push({
+                                Vendor: String(oItem.Vendor),
+                                Plant: String(oItem.Plant || "")
+                            });
+                        }
+                    });
+
+                    this.getView().getModel("vendorModel").setProperty("/results", aVendors);
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error loading vendorF4", oError);
+                    this.getView().getModel("vendorModel").setProperty("/results", []);
+                    MessageToast.show("Failed to load Supplier Code");
+                }.bind(this)
+            });
+        },
+
+        _refreshAllRowDropdowns: function () {
+            var oItemModel = this.getView().getModel("ItemModel");
+            if (!oItemModel) {
+                return;
+            }
+
+            var aRows = oItemModel.getProperty("/results") || [];
+
+            for (var i = 0; i < aRows.length; i++) {
+                this._setPoNoItemsForRow(aRows[i]);
+                this._setPoItemItemsForRow(aRows[i]);
+                this._setMaterialItemsForRow(aRows[i]);
+            }
+
+            oItemModel.setProperty("/results", aRows);
+        },
+
+        _getAllPurchaseOrders: function () {
+            return this.getView().getModel("poModel").getProperty("/allPurchaseOrders") || [];
+        },
+
+        _getSelectedPlant: function () {
+            return this.getView().getModel("TRIPMODEL").getProperty("/Plant");
+        },
+
+        _setPoNoItemsForRow: function (oRow) {
+            var aAll = this._getAllPurchaseOrders();
+            var sPlant = this._getSelectedPlant();
+
+            var oUnique = {};
+            var aPoNos = [];
+
+            aAll.forEach(function (oItem) {
+                if (sPlant && String(oItem.Plant) !== String(sPlant)) {
+                    return;
+                }
+
+                if (oItem.purchaseorderno && !oUnique[oItem.purchaseorderno]) {
+                    oUnique[oItem.purchaseorderno] = true;
+                    aPoNos.push({
+                        purchaseorderno: String(oItem.purchaseorderno)
+                    });
+                }
+            });
+
+            oRow.poNoItems = aPoNos;
+        },
+
+        _setPoItemItemsForRow: function (oRow) {
+            var aAll = this._getAllPurchaseOrders();
+            var sPlant = this._getSelectedPlant();
+            var sPoNo = oRow.Pono;
+
+            if (!sPoNo) {
+                oRow.poItemItems = [];
+                return;
+            }
+
+            var oUnique = {};
+            var aPoItems = [];
+
+            aAll.forEach(function (oItem) {
+                if (sPlant && String(oItem.Plant) !== String(sPlant)) {
+                    return;
+                }
+
+                if (String(oItem.purchaseorderno) !== String(sPoNo)) {
+                    return;
+                }
+
+                if (oItem.purchaseorderitem && !oUnique[oItem.purchaseorderitem]) {
+                    oUnique[oItem.purchaseorderitem] = true;
+                    aPoItems.push({
+                        purchaseorderitem: String(oItem.purchaseorderitem)
+                    });
+                }
+            });
+
+            oRow.poItemItems = aPoItems;
+        },
+
+        _setMaterialItemsForRow: function (oRow) {
+            var aAll = this._getAllPurchaseOrders();
+            var sPlant = this._getSelectedPlant();
+            var sPoNo = oRow.Pono;
+            var sPoItem = oRow.Poitem;
+
+            if (!sPoNo || !sPoItem) {
+                oRow.materialItems = [];
+                return;
+            }
+
+            var oUnique = {};
+            var aMaterials = [];
+
+            aAll.forEach(function (oItem) {
+                if (sPlant && String(oItem.Plant) !== String(sPlant)) {
+                    return;
+                }
+
+                if (String(oItem.purchaseorderno) !== String(sPoNo)) {
+                    return;
+                }
+
+                if (String(oItem.purchaseorderitem) !== String(sPoItem)) {
+                    return;
+                }
+
+                if (oItem.Material && !oUnique[oItem.Material]) {
+                    oUnique[oItem.Material] = true;
+                    aMaterials.push({
+                        Material: String(oItem.Material)
+                    });
+                }
+            });
+
+            oRow.materialItems = aMaterials;
+        },
+        
+        onAddRow: function () {
+    var oItemModel = this.getView().getModel("ItemModel");
+    var aRows = oItemModel.getProperty("/results") || [];
+
+    var oNewRow = this._createEmptyRow(aRows.length + 1);
+
+    this._setPoNoItemsForRow(oNewRow);
+
+    aRows.push(oNewRow);
+
+    for (var i = 0; i < aRows.length; i++) {
+        aRows[i].Sino = i + 1;
+    }
+
+    oItemModel.setProperty("/results", aRows);
+},
+
+        onPlantChange: function (oEvent) {
+            var sPlant = oEvent.getSource().getSelectedKey();
+
+            this.getView().getModel("TRIPMODEL").setProperty("/Plant", sPlant);
+            this.getView().getModel("TRIPMODEL").setProperty("/Supcode", "");
+
+            this._loadVendorsByPlant(sPlant);
+
+            var oItemModel = this.getView().getModel("ItemModel");
+            var aRows = oItemModel.getProperty("/results") || [];
+
+            aRows.forEach(function (oRow) {
+                oRow.Pono = "";
+                oRow.Poitem = "";
+                oRow.Matnr = "";
+                oRow.poItemItems = [];
+                oRow.materialItems = [];
+            });
+
+            oItemModel.setProperty("/results", aRows);
+            this._refreshAllRowDropdowns();
+        },
+
+        onPurchaseOrderChange: function (oEvent) {
+            var oContext = oEvent.getSource().getBindingContext("ItemModel");
+            var sPath = oContext.getPath();
+            var oItemModel = this.getView().getModel("ItemModel");
+            var oRow = oItemModel.getProperty(sPath);
+
+            oRow.Pono = oEvent.getSource().getSelectedKey();
+            oRow.Poitem = "";
+            oRow.Matnr = "";
+            oRow.poItemItems = [];
+            oRow.materialItems = [];
+
+            this._setPoItemItemsForRow(oRow);
+            this._setMaterialItemsForRow(oRow);
+
+            oItemModel.setProperty(sPath, oRow);
+            this.onFieldChange();
+        },
+
+        onPurchaseOrderItemChange: function (oEvent) {
+            var oContext = oEvent.getSource().getBindingContext("ItemModel");
+            var sPath = oContext.getPath();
+            var oItemModel = this.getView().getModel("ItemModel");
+            var oRow = oItemModel.getProperty(sPath);
+
+            oRow.Poitem = oEvent.getSource().getSelectedKey();
+            oRow.Matnr = "";
+            oRow.materialItems = [];
+
+            this._setMaterialItemsForRow(oRow);
+
+            oItemModel.setProperty(sPath, oRow);
+            this.onFieldChange();
+        },
+
+        onMaterialChange: function (oEvent) {
+            var oContext = oEvent.getSource().getBindingContext("ItemModel");
+            var sPath = oContext.getPath();
+            var oItemModel = this.getView().getModel("ItemModel");
+            var oRow = oItemModel.getProperty(sPath);
+
+            oRow.Matnr = oEvent.getSource().getSelectedKey();
+            oItemModel.setProperty(sPath, oRow);
+            this.onFieldChange();
+        },
+
+        onInvoiceNoLiveChange: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sValue = oInput.getValue();
+
+            var sCleanValue = sValue.replace(/[^A-Za-z0-9\/-]/g, "");
+
+            if (sValue !== sCleanValue) {
+                oInput.setValue(sCleanValue);
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Only letters, numbers, hyphen (-) and slash (/) are allowed.");
+            } else {
+                oInput.setValueState("None");
+                oInput.setValueStateText("");
+            }
+
+            this.onFieldChange();
+        },
+
+        onCaptureWeight: function () {
+            var oLiveModel = this.getView().getModel("liveModel");
+            var oTripModel = this.getView().getModel("TRIPMODEL");
+
+            var sWeight = oLiveModel.getProperty("/Weight");
+            var sFirst = oTripModel.getProperty("/Firstwgt");
+            var sSecond = oTripModel.getProperty("/Secondwgt");
+
+            if (!sFirst) {
+                oTripModel.setProperty("/Firstwgt", sWeight);
+            } else if (!sSecond) {
+                oTripModel.setProperty("/Secondwgt", sWeight);
+
+                var fFirst = parseFloat(sFirst) || 0;
+                var fSecond = parseFloat(sWeight) || 0;
+                var iNet = Math.abs(fFirst - fSecond);
+
+                oTripModel.setProperty("/Netwgt", iNet.toString());
+            } else {
+                MessageToast.show("Both weights already captured");
+            }
+        },
+
+        onFieldChange: function () {
             var oModel = this.getView().getModel("ItemModel");
             var aData = oModel.getProperty("/results");
 
-            var oLastRow = aData[aData.length - 1];
-
-            if (oLastRow.Invoiceno ||
-                oLastRow.Pono ||
-                oLastRow.Matnr ||
-                oLastRow.Qty) {
-
-                aData.push(this._createEmptyRow(aData.length + 1));
-
-                oModel.setProperty("/results", aData);
+            if (!aData || aData.length === 0) {
+                return;
             }
 
-        },
-        onDeleteRow: function (oEvent) {
+            var oLastRow = aData[aData.length - 1];
 
+            if (
+                oLastRow.Invoiceno ||
+                oLastRow.Pono ||
+                oLastRow.Poitem ||
+                oLastRow.Matnr ||
+                oLastRow.Qty
+            ) {
+                var oNewRow = this._createEmptyRow(aData.length + 1);
+                this._setPoNoItemsForRow(oNewRow);
+                aData.push(oNewRow);
+                oModel.setProperty("/results", aData);
+            }
+        },
+
+        onDeleteRow: function (oEvent) {
             var oModel = this.getView().getModel("ItemModel");
             var aData = oModel.getProperty("/results");
 
             var oItem = oEvent.getSource().getParent();
-            var iIndex = oItem.getBindingContext("ItemModel").getPath().split("/")[2];
+            var iIndex = parseInt(oItem.getBindingContext("ItemModel").getPath().split("/")[2], 10);
 
             aData.splice(iIndex, 1);
 
@@ -184,40 +493,43 @@ sap.ui.define([
                 aData[i].Sino = i + 1;
             }
 
-            oModel.setProperty("/results", aData);
+            if (aData.length === 0) {
+                var oNewRow = this._createEmptyRow(1);
+                this._setPoNoItemsForRow(oNewRow);
+                aData.push(oNewRow);
+            }
 
+            oModel.setProperty("/results", aData);
         },
+
         onUpdate: function () {
-            var that = this;
             var oHeader = this.getView().getModel("TRIPMODEL").getData();
             var aItems = this.getView().getModel("ItemModel").getData().results;
 
-            var oItems = aItems.filter(function (item) {
-                return item.Invoiceno && item.Pono && item.Matnr;
+            var aValidItems = aItems.filter(function (item) {
+                return item.Invoiceno && item.Pono && item.Poitem && item.Matnr;
             });
 
             var sPlant = oHeader.Plant;
             var sTripId = oHeader.TripId;
-            oItems.forEach(function (item, index) {
 
+            aValidItems.forEach(function (item, index) {
                 item.Plant = sPlant;
                 item.TripId = sTripId;
                 item.Sino = (index + 1).toString();
 
+                delete item.poNoItems;
+                delete item.poItemItems;
+                delete item.materialItems;
             });
 
-            debugger;
-            //oHeader.to_wgtitem = oItems;
-            oHeader.ItemsJson = JSON.stringify(oItems);
+            oHeader.ItemsJson = JSON.stringify(aValidItems);
 
-            var oModel = this.getView().getModel(); // main OData model
-            var sPath = "/ZC_MGATEWT_HDR(Plant='" + sPlant + "',TripId='" + sTripId + "')";
-
-            debugger;
+            var oModel = this.getOwnerComponent().getModel();
 
             oModel.callFunction("/updateWithItems", {
                 method: "POST",
-                urlParameters:{
+                urlParameters: {
                     Plant: oHeader.Plant,
                     TripId: oHeader.TripId,
                     Truckno: oHeader.Truckno,
@@ -231,70 +543,17 @@ sap.ui.define([
                     Secondwgttime: oHeader.Secondwgttime,
                     Userid: oHeader.Userid,
                     Status: oHeader.Status,
-                    Netwgt: oHeader.Netwgt    ,
-                    ItemsJson : oHeader.ItemsJson
+                    Netwgt: oHeader.Netwgt,
+                    ItemsJson: oHeader.ItemsJson
                 },
-                success: function (oData,response) {
-                    sap.m.MessageToast.show("Updated Successfully");
+                success: function () {
+                    MessageToast.show("Updated Successfully");
                 },
                 error: function (oError) {
-                    console.log(oError);
+                    console.error(oError);
+                    MessageToast.show("Error while updating");
                 }
             });
-
-            // oModel.callFunction("/updateWithItems", {
-            //     method: "POST",
-            //     urlParameters: {
-            //         Plant: oHeader.Plant,
-            //         TripId: oHeader.TripId,
-            //         Truckno: oHeader.Truckno,
-            //         Supcode: oHeader.Supcode,
-            //         Firstwgt: oHeader.Firstwgt,
-            //         Refunit: oHeader.Refunit,
-            //         Firstwgtdate: oHeader.Firstwgtdate,
-            //         Firstwgttime: oHeader.Firstwgttime,
-            //         Secondwgt: oHeader.Secondwgt,
-            //         Secondwgtdate: oHeader.Secondwgtdate,
-            //         Secondwgttime: oHeader.Secondwgttime,
-            //         Userid: oHeader.Userid,
-            //         Status: oHeader.Status,
-            //         Netwgt: oHeader.Netwgt                    
-
-            //     },
-
-            //     // IMPORTANT: pass deep payload manually
-            //     payload: oHeader,
-
-            //     success: function (oData) {
-            //         sap.m.MessageToast.show("Updated Successfully");
-            //     },
-            //     error: function (oError) {
-            //         console.log(oError);
-            //     }
-            // });
-            // oModel.update(sPath, oHeader, {
-
-            //     success: function (oSuccess) {
-            //         console.log(oSuccess);
-            //         debugger;
-            //         //this.getView().getModel().getData();   
-            //         var oTripModel = this.getView().getModel("TRIPMODEL");
-
-            //         // Update TripId in model                    
-            //         MessageBox.show("Trip ID Updated Successfully - " + oSuccess.TripId);
-            //     }.bind(this),
-
-            //     error: function (oError) {
-            //         console.log(oError);
-            //         sap.m.MessageToast.show("Error while Updating");
-            //     }
-
-            // });
-
-
         }
-
     });
-}
-);
-
+});

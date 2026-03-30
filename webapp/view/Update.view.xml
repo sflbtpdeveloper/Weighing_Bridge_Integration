@@ -12,38 +12,39 @@
         showFooter="true"
         showHeader="false"
         showNavButton="false"
-        class="sapUiNoContentPadding" 
+        class="sapUiNoContentPadding"
     >
         <content>
- <HBox
-                        class="videoHeader"
-                        alignItems="Center"
-                        justifyContent="SpaceBetween"
-                    >
-                        <HBox
-                            alignItems="Center"
-                            justifyContent="Start"
-                            class="headerLeft sapUiNoMargin sapUiNoPadding"
-                        >
-                            <Image
-                                src="../images/sfllogoonly.png"
-                                width="3rem"
-                                class="sapUiSmallMarginEnd"
-                            />
-                            <VBox class="headerTextBox sapUiTinyMarginBegin">
-                                <Title
-                                    text="SUNDRAM FASTENERS LIMITED"
-                                    class="videoHeaderTitle"
-                                />
-                                <Text
-                                    text="Weigh Bridge Integration"
-                                    class="videoHeaderSubTitle"
-                                />
-                            </VBox>
-                        </HBox>
-                    </HBox>                    
+            <HBox
+                class="videoHeader"
+                alignItems="Center"
+                justifyContent="SpaceBetween"
+            >
+                <HBox
+                    alignItems="Center"
+                    justifyContent="Start"
+                    class="headerLeft sapUiNoMargin sapUiNoPadding"
+                >
+                    <Image
+                        src="../images/sfllogoonly.png"
+                        width="3rem"
+                        class="sapUiSmallMarginEnd"
+                    />
+                    <VBox class="headerTextBox sapUiTinyMarginBegin">
+                        <Title
+                            text="SUNDRAM FASTENERS LIMITED"
+                            class="videoHeaderTitle"
+                        />
+                        <Text
+                            text="Weigh Bridge Integration"
+                            class="videoHeaderSubTitle"
+                        />
+                    </VBox>
+                </HBox>
+            </HBox>
+
             <Toolbar>
-            <HBox width="33%" />
+                <HBox width="33%" />
                 <HBox
                     width="34%"
                     justifyContent="Center"
@@ -53,22 +54,21 @@
                         textAlign="Center"
                         titleStyle="Auto"
                         class="sapUiTinyMarginBegin sapUiTinyMarginTop videoHeaderSubTitle"
-                    />      
-             </HBox>
+                    />
+                </HBox>
                 <HBox
                     width="33%"
                     justifyContent="End"
-                >     
-                <Button
-                    text="UPDATE"
-                    press="onUpdate"
-                    icon="sap-icon://save"
-                    type="Accept"
-                    enabled="{saveButtonModel>/isSaveEnabled}"
-                />
+                >
+                    <Button
+                        text="UPDATE"
+                        press="onUpdate"
+                        icon="sap-icon://save"
+                        type="Accept"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    />
                 </HBox>
             </Toolbar>
-            
 
             <VBox
                 alignItems="Center"
@@ -91,6 +91,7 @@
                     icon="sap-icon://download"
                 />
             </VBox>
+
             <VBox class="sapUiSmallMargin">
                 <f:SimpleForm
                     id="SimpleFormChange456"
@@ -104,24 +105,19 @@
                 >
                     <f:content>
                         <Label text="Plant" />
-                        <!-- <Input
-                            id="idWerk"
-                            value="{TRIPMODEL>/Plant}"
-                            editable="true"
-                        /> -->
-
                         <ComboBox
                             id="idWerk"
                             selectedKey="{TRIPMODEL>/Plant}"
-                            items="{
-        path: '/plant'
-    }"
+                            selectionChange="onPlantChange"
+                            items="{ path: '/plant' }"
                         >
                             <core:Item
                                 key="{Plant}"
                                 text="{Plant} - {PlantName}"
+                                templateShareable="false"
                             />
                         </ComboBox>
+
                         <Label text="Trip ID" />
                         <Input
                             id="idTripid"
@@ -132,18 +128,28 @@
                                 <l:GridData span="XL2 L1 M3 S4" />
                             </layoutData>
                         </Input>
+
                         <Label text="Truck Number" />
                         <Input
                             id="idTrNo"
                             value="{TRIPMODEL>/Truckno}"
                             editable="false"
                         />
+
                         <Label text="Supplier Code" />
-                        <Input
+                        <ComboBox
                             id="idSupcode"
-                            value="{TRIPMODEL>/Supcode}"
-                            editable="true"
-                        />
+                            width="100%"
+                            selectedKey="{TRIPMODEL>/Supcode}"
+                            placeholder="Select Supplier Code"
+                            items="{vendorModel>/results}"
+                        >
+                            <core:Item
+                                key="{vendorModel>Vendor}"
+                                text="{vendorModel>Vendor}"
+                                templateShareable="false"
+                            />
+                        </ComboBox>
 
                         <Label text="First Weight" />
                         <Input
@@ -174,95 +180,137 @@
                         <Input
                             id="idUnit"
                             value="{TRIPMODEL>/Refunit}"
-                            change="onInvoiceQtyChange"
                             required="false"
                         />
                     </f:content>
                 </f:SimpleForm>
             </VBox>
 
-            <VBox class="sapUiSmallMargin">
-                <Table
-                    id="idItemTable"
-                    items="{ItemModel>/results}"
-                    growing="true"
-                    growingThreshold="20"
-                    headerText="Enter Weight (Item Details)"
-                >
-                    <columns>
-                        <Column>
-                            <Text text="Serial No" />
-                        </Column>
+         <VBox class="sapUiSmallMargin">
+    <Table
+        id="idItemTable"
+        items="{ItemModel>/results}"
+        growing="true"
+        growingThreshold="20"
+    >
+        <headerToolbar>
+            <Toolbar>
+                <Title text="Enter Weight (Item Details)" />
+                <Button
+                    text="Add"
+                    icon="sap-icon://add"
+                    type="Emphasized"
+                    press="onAddRow"
+                    class="sapUiTinyMarginBegin"
+                />
+                <ToolbarSpacer />
+            </Toolbar>
+        </headerToolbar>
 
-                        <Column>
-                            <Text text="Invoice No" />
-                        </Column>
+        <columns>
+            <Column>
+                <Text text="Serial No" />
+            </Column>
 
-                        <Column>
-                            <Text text="Invoice Date" />
-                        </Column>
-                        <Column>
-                            <Text text="Purchase Order No" />
-                        </Column>
-                        <Column>
-                            <Text text="Purchase Order Item" />
-                        </Column>
-                        <Column>
-                            <Text text="Material" />
-                        </Column>
-                        <Column>
-                            <Text text="Quantity/UOM" />
-                        </Column>
-                        <Column width="80px">
-                            <Text text="Delete" />
-                        </Column>
-                    </columns>
+            <Column>
+                <Text text="Invoice No" />
+            </Column>
 
-                    <items>
-                        <ColumnListItem>
-                            <cells>
-                                <Text text="{ItemModel>Sino}" />
-                                <Input
-                                    value="{ItemModel>Invoiceno}"
-                                    liveChange=".onFieldChange"
-                                />
+            <Column>
+                <Text text="Invoice Date" />
+            </Column>
 
-                                <DatePicker
-                                    value="{ItemModel>Invoicedt}"
-                                    displayFormat="dd-MM-yyyy"
-                                    valueFormat="yyyy-MM-ddTHH:mm:ss"
-                                    change=".onFieldChange"
-                                />
+            <Column>
+                <Text text="Purchase Order No" />
+            </Column>
 
-                                <Input
-                                    value="{ItemModel>Pono}"
-                                    liveChange=".onFieldChange"
-                                />
+            <Column>
+                <Text text="Purchase Order Item" />
+            </Column>
 
-                                <Input
-                                    value="{ItemModel>Poitem}"
-                                    liveChange=".onFieldChange"
-                                />
+            <Column>
+                <Text text="Material" />
+            </Column>
 
-                                <Input
-                                    value="{ItemModel>Matnr}"
-                                    liveChange=".onFieldChange"
-                                />
+            <Column>
+                <Text text="Quantity/UOM" />
+            </Column>
 
-                                <Input
-                                    value="{ItemModel>Qty}"
-                                    liveChange=".onFieldChange"
-                                />
+            <Column width="80px">
+                <Text text="Delete" />
+            </Column>
+        </columns>
 
-                                <Button
-                                    icon="sap-icon://delete"
-                                    press=".onDeleteRow"
-                                />
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
-            </VBox>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{ItemModel>Sino}" />
+
+                    <Input
+                        value="{ItemModel>Invoiceno}"
+                        liveChange="onInvoiceNoLiveChange"
+                    />
+
+                    <DatePicker
+                        value="{ItemModel>Invoicedt}"
+                        displayFormat="dd-MM-yyyy"
+                        valueFormat="yyyy-MM-ddTHH:mm:ss"
+                        change="onFieldChange"
+                    />
+
+                    <ComboBox
+                        width="100%"
+                        selectedKey="{ItemModel>Pono}"
+                        selectionChange="onPurchaseOrderChange"
+                        items="{ItemModel>poNoItems}"
+                    >
+                        <core:Item
+                            key="{ItemModel>purchaseorderno}"
+                            text="{ItemModel>purchaseorderno}"
+                            templateShareable="false"
+                        />
+                    </ComboBox>
+
+                    <ComboBox
+                        width="100%"
+                        selectedKey="{ItemModel>Poitem}"
+                        selectionChange="onPurchaseOrderItemChange"
+                        items="{ItemModel>poItemItems}"
+                    >
+                        <core:Item
+                            key="{ItemModel>purchaseorderitem}"
+                            text="{ItemModel>purchaseorderitem}"
+                            templateShareable="false"
+                        />
+                    </ComboBox>
+
+                    <ComboBox
+                        width="100%"
+                        selectedKey="{ItemModel>Matnr}"
+                        selectionChange="onMaterialChange"
+                        items="{ItemModel>materialItems}"
+                    >
+                        <core:Item
+                            key="{ItemModel>Material}"
+                            text="{ItemModel>Material}"
+                            templateShareable="false"
+                        />
+                    </ComboBox>
+
+                    <Input
+                        value="{ItemModel>Qty}"
+                        liveChange="onFieldChange"
+                    />
+
+                    <Button
+                        icon="sap-icon://delete"
+                        press="onDeleteRow"
+                    />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</VBox>
         </content>
     </Page>
 </mvc:View>

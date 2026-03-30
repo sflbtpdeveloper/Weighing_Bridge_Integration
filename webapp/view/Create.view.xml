@@ -1,18 +1,17 @@
 <mvc:View
+    controllerName="zmwbi.controller.Create"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
     xmlns:l="sap.ui.layout"
-    xmlns:unified="sap.ui.unified"
     xmlns:core="sap.ui.core"
-    controllerName="zmwbi.controller.Create"
 >
     <Page
         id="Create"
         showFooter="true"
         showHeader="false"
         showNavButton="false"
-        class="sapUiNoContentPadding" 
+        class="sapUiNoContentPadding"
     >
         <content>
             <HBox
@@ -42,12 +41,10 @@
                     </VBox>
                 </HBox>
             </HBox>
+
             <Toolbar>
                 <HBox width="33%" />
-                <HBox
-                    width="34%"
-                    justifyContent="Center"
-                >
+                <HBox width="34%" justifyContent="Center">
                     <Title
                         text="FIRST - WEIGHMENT ENTRY"
                         textAlign="Center"
@@ -55,10 +52,7 @@
                         class="sapUiTinyMarginBegin sapUiTinyMarginTop videoHeaderSubTitle"
                     />
                 </HBox>
-                <HBox
-                    width="33%"
-                    justifyContent="End"
-                >
+                <HBox width="33%" justifyContent="End">
                     <Button
                         text="SAVE"
                         press="onSave"
@@ -68,12 +62,6 @@
                     />
                 </HBox>
             </Toolbar>
-            <!-- <Label text="Live Weight"/>
-<Input 
-    id="idLiveWeight"
-    value="{liveModel>/Weight}"
-    editable="false"
-    class="sapUiSmallMarginBottom"/> -->
 
             <VBox
                 alignItems="Center"
@@ -96,6 +84,7 @@
                     icon="sap-icon://download"
                 />
             </VBox>
+
             <VBox class="sapUiSmallMargin">
                 <f:SimpleForm
                     id="SimpleFormChange456"
@@ -109,24 +98,18 @@
                 >
                     <f:content>
                         <Label text="Plant" />
-                        <!-- <Input
-                            id="idWerk"
-                            value="{TRIPMODEL>/Plant}"
-                            editable="true"
-                        /> -->
-
                         <ComboBox
                             id="idWerk"
                             selectedKey="{TRIPMODEL>/Plant}"
-                            items="{
-        path: '/plant'
-    }"
+                            selectionChange="onPlantChange"
+                            items="{ path: '/plant' }"
                         >
                             <core:Item
                                 key="{Plant}"
                                 text="{Plant} - {PlantName}"
                             />
                         </ComboBox>
+
                         <Label text="Trip ID" />
                         <Input
                             id="idTripid"
@@ -137,20 +120,27 @@
                                 <l:GridData span="XL2 L1 M3 S4" />
                             </layoutData>
                         </Input>
+
                         <Label text="Truck Number" />
                         <Input
                             id="idTrNo"
                             value="{TRIPMODEL>/Truckno}"
                             editable="true"
                         />
+
                         <Label text="Supplier Code" />
-                        <Input
+                        <ComboBox
                             id="idSupcode"
-                            value="{TRIPMODEL>/Supcode}"
-                            editable="true"
-                            valueHelpRequest="onVendorF4"
-                            showValueHelp="true"
-                        />
+                            width="100%"
+                            selectedKey="{TRIPMODEL>/Supcode}"
+                            placeholder="Select Supplier Code"
+                            items="{vendorModel>/results}"
+                        >
+                            <core:Item
+                                key="{vendorModel>Vendor}"
+                                text="{vendorModel>Vendor}"
+                            />
+                        </ComboBox>
 
                         <Label text="First Weight" />
                         <Input
@@ -179,7 +169,6 @@
                         <Input
                             id="idUnit"
                             value="{TRIPMODEL>/Refunit}"
-                            change="onInvoiceQtyChange"
                             required="false"
                         />
                     </f:content>
@@ -195,73 +184,77 @@
                     headerText="Enter Weight (Item Details)"
                 >
                     <columns>
-                        <Column>
-                            <Text text="Serial No" />
-                        </Column>
-
-                        <Column>
-                            <Text text="Invoice No" />
-                        </Column>
-
-                        <Column>
-                            <Text text="Invoice Date" />
-                        </Column>
-                        <Column>
-                            <Text text="Purchase Order No" />
-                        </Column>
-                        <Column>
-                            <Text text="Purchase Order Item" />
-                        </Column>
-                        <Column>
-                            <Text text="Material" />
-                        </Column>
-                        <Column>
-                            <Text text="Quantity/UOM" />
-                        </Column>
-                        <Column width="80px">
-                            <Text text="Delete" />
-                        </Column>
+                        <Column><Text text="Serial No" /></Column>
+                        <Column><Text text="Invoice No" /></Column>
+                        <Column><Text text="Invoice Date" /></Column>
+                        <Column><Text text="Purchase Order No" /></Column>
+                        <Column><Text text="Purchase Order Item" /></Column>
+                        <Column><Text text="Material" /></Column>
+                        <Column><Text text="Quantity/UOM" /></Column>
+                        <Column width="80px"><Text text="Delete" /></Column>
                     </columns>
 
                     <items>
                         <ColumnListItem>
                             <cells>
                                 <Text text="{ItemModel>Sino}" />
+
                                 <Input
                                     value="{ItemModel>Invoiceno}"
-                                    liveChange=".onFieldChange"
+                                    liveChange="onInvoiceNoLiveChange"
                                 />
 
                                 <DatePicker
                                     value="{ItemModel>Invoicedt}"
                                     displayFormat="dd-MM-yyyy"
                                     valueFormat="yyyy-MM-ddTHH:mm:ss"
-                                    change=".onFieldChange"
+                                    change="onFieldChange"
                                 />
 
-                                <Input
-                                    value="{ItemModel>Pono}"
-                                    liveChange=".onFieldChange"
-                                />
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Pono}"
+                                    selectionChange="onPurchaseOrderChange"
+                                    items="{ItemModel>poNoItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderno}"
+                                        text="{ItemModel>purchaseorderno}"
+                                    />
+                                </ComboBox>
 
-                                <Input
-                                    value="{ItemModel>Poitem}"
-                                    liveChange=".onFieldChange"
-                                />
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Poitem}"
+                                    selectionChange="onPurchaseOrderItemChange"
+                                    items="{ItemModel>poItemItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderitem}"
+                                        text="{ItemModel>purchaseorderitem}"
+                                    />
+                                </ComboBox>
 
-                                <Input
-                                    value="{ItemModel>Matnr}"
-                                    liveChange=".onFieldChange"
-                                />
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Matnr}"
+                                    selectionChange="onMaterialChange"
+                                    items="{ItemModel>materialItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>Material}"
+                                        text="{ItemModel>Material}"
+                                    />
+                                </ComboBox>
 
                                 <Input
                                     value="{ItemModel>Qty}"
-                                    liveChange=".onFieldChange"
+                                    liveChange="onFieldChange"
                                 />
 
                                 <Button
                                     icon="sap-icon://delete"
-                                    press=".onDeleteRow"
+                                    press="onDeleteRow"
                                 />
                             </cells>
                         </ColumnListItem>
