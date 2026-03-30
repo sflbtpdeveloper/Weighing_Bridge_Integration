@@ -112,7 +112,7 @@ sap.ui.define([
             var sWeight = oLiveModel.getProperty("/Weight");
 
             var sFirst = oTripModel.getProperty("/Firstwgt");
-            var sSecond = oTripModel.getProperty("/Secondwgt");
+            // var sSecond = oTripModel.getProperty("/Secondwgt");
 
 
 
@@ -120,13 +120,14 @@ sap.ui.define([
 
                 oTripModel.setProperty("/Firstwgt", sWeight);
 
-            } else if (!sSecond) {
+            } 
+            // else if (!sSecond) {
 
-                oTripModel.setProperty("/Secondwgt", sWeight);
+            //     oTripModel.setProperty("/Secondwgt", sWeight);
 
-            var fFirst = parseFloat(sFirst) || 0;
-            var fSecond = parseFloat(sSecond) || 0;
-            var iNet = Math.abs(fFirst - fSecond);
+            // var fFirst = parseFloat(sFirst) || 0;
+            // var fSecond = parseFloat(sSecond) || 0;
+            // var iNet = Math.abs(fFirst - fSecond);
                 // calculate net weight
                 //var iNet = parseFloat(sSecond) - parseFloat(sFirst);
 
@@ -134,11 +135,11 @@ sap.ui.define([
                 //     iNet = parseFloat(sFirst) - parseFloat(sSecond);
                 // }
 
-                oTripModel.setProperty("/Netwgt", iNet.toString());
-            }
-            else {
-                sap.m.MessageToast.show("Both weights already captured");
-            }
+                // oTripModel.setProperty("/Netwgt", iNet.toString());
+            // }
+            // else {
+            //     sap.m.MessageToast.show("Both weights already captured");
+            // }
 
         },
         onModelRefresh: function (e) {

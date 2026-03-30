@@ -12,7 +12,7 @@
         showFooter="true"
         showHeader="false"
         showNavButton="false"
-        class="sapUiNoContentPadding" 
+        class="sapUiNoContentPadding"
     >
         <content>
             <HBox
@@ -25,10 +25,15 @@
                     justifyContent="Start"
                     class="headerLeft sapUiNoMargin sapUiNoPadding"
                 >
-                    <Image
+                    <!-- <Image
                         src="../images/sfllogoonly.png"
                         width="3rem"
                         class="sapUiSmallMarginEnd"
+                    /> -->
+                    <VBox
+                        class="logoImage"
+                        width="4rem"
+                        height="4rem"
                     />
                     <VBox class="headerTextBox sapUiTinyMarginBegin">
                         <Title
@@ -59,13 +64,13 @@
                     width="33%"
                     justifyContent="End"
                 >
-                    <Button
+                    <!-- <Button
                         text="SAVE"
                         press="onSave"
                         icon="sap-icon://save"
                         type="Accept"
                         enabled="{saveButtonModel>/isSaveEnabled}"
-                    />
+                    /> -->
                 </HBox>
             </Toolbar>
             <!-- <Label text="Live Weight"/>
@@ -97,6 +102,18 @@
                 />
             </VBox>
             <VBox class="sapUiSmallMargin">
+                <Toolbar>
+                    <Title text="Enter Weight (Header Details)" />
+                    <ToolbarSpacer />
+                    <Button
+                        text="SAVE"
+                        press="onSave"
+                        icon="sap-icon://save"
+                        type="Accept"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    />
+                </Toolbar>
+
                 <f:SimpleForm
                     id="SimpleFormChange456"
                     editable="true"
@@ -104,7 +121,6 @@
                     columnsM="2"
                     columnsL="2"
                     columnsXL="3"
-                    title="Enter Weight (Header Details)"
                     backgroundDesign="Translucent"
                 >
                     <f:content>
@@ -141,7 +157,7 @@
                         <Input
                             id="idTrNo"
                             value="{TRIPMODEL>/Truckno}"
-                            editable="true"
+                            editable="false"
                         />
                         <Label text="Supplier Code" />
                         <Input
@@ -160,20 +176,20 @@
                             class="weightGreen"
                         />
 
-                        <Label text="Second Weight" />
+                        <!-- <Label text="Second Weight" />
                         <Input
                             id="idSW"
                             value="{TRIPMODEL>/Secondwgt}"
                             editable="false"
                             class="weightGreen"
-                        />
+                        /> -->
 
-                        <Label text="Net Weight" />
+                        <!-- <Label text="Net Weight" />
                         <Input
                             id="idNW"
                             value="{TRIPMODEL>/Netwgt}"
                             editable="false"
-                        />
+                        /> -->
 
                         <Label text="Unit" />
                         <Input
@@ -187,12 +203,15 @@
             </VBox>
 
             <VBox class="sapUiSmallMargin">
+                <Toolbar>
+                    <Title text="Enter Weight (Item Details)" />
+                    <ToolbarSpacer />
+                </Toolbar>
                 <Table
                     id="idItemTable"
                     items="{ItemModel>/results}"
                     growing="true"
                     growingThreshold="20"
-                    headerText="Enter Weight (Item Details)"
                 >
                     <columns>
                         <Column>

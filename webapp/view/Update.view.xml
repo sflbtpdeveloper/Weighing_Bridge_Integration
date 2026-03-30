@@ -12,38 +12,44 @@
         showFooter="true"
         showHeader="false"
         showNavButton="false"
-        class="sapUiNoContentPadding" 
+        class="sapUiNoContentPadding"
     >
         <content>
- <HBox
-                        class="videoHeader"
-                        alignItems="Center"
-                        justifyContent="SpaceBetween"
-                    >
-                        <HBox
-                            alignItems="Center"
-                            justifyContent="Start"
-                            class="headerLeft sapUiNoMargin sapUiNoPadding"
-                        >
-                            <Image
+            <HBox
+                class="videoHeader"
+                alignItems="Center"
+                justifyContent="SpaceBetween"
+            >
+                <HBox
+                    alignItems="Center"
+                    justifyContent="Start"
+                    class="headerLeft sapUiNoMargin sapUiNoPadding"
+                >
+                    <!-- <Image
                                 src="../images/sfllogoonly.png"
                                 width="3rem"
                                 class="sapUiSmallMarginEnd"
-                            />
-                            <VBox class="headerTextBox sapUiTinyMarginBegin">
-                                <Title
-                                    text="SUNDRAM FASTENERS LIMITED"
-                                    class="videoHeaderTitle"
-                                />
-                                <Text
-                                    text="Weigh Bridge Integration"
-                                    class="videoHeaderSubTitle"
-                                />
-                            </VBox>
-                        </HBox>
-                    </HBox>                    
+                            /> -->
+                    <VBox
+                        class="logoImage"
+                        width="4rem"
+                        height="4rem"
+                    />
+                    <!-- <VBox class="headerTextBox sapUiTinyMarginBegin"> -->
+                    <VBox>
+                        <Title
+                            text="SUNDRAM FASTENERS LIMITED"
+                            class="videoHeaderTitle"
+                        />
+                        <Text
+                            text="Weigh Bridge Integration"
+                            class="videoHeaderSubTitle"
+                        />
+                    </VBox>
+                </HBox>
+            </HBox>
             <Toolbar>
-            <HBox width="33%" />
+                <HBox width="33%" />
                 <HBox
                     width="34%"
                     justifyContent="Center"
@@ -53,22 +59,21 @@
                         textAlign="Center"
                         titleStyle="Auto"
                         class="sapUiTinyMarginBegin sapUiTinyMarginTop videoHeaderSubTitle"
-                    />      
-             </HBox>
+                    />
+                </HBox>
                 <HBox
                     width="33%"
                     justifyContent="End"
-                >     
-                <Button
-                    text="UPDATE"
-                    press="onUpdate"
-                    icon="sap-icon://save"
-                    type="Accept"
-                    enabled="{saveButtonModel>/isSaveEnabled}"
-                />
+                >
+                    <!-- <Button
+                        text="UPDATE"
+                        press="onUpdate"
+                        icon="sap-icon://save"
+                        type="Attention"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    /> -->
                 </HBox>
             </Toolbar>
-            
 
             <VBox
                 alignItems="Center"
@@ -92,14 +97,24 @@
                 />
             </VBox>
             <VBox class="sapUiSmallMargin">
+              <Toolbar>
+                    <Title text="Enter Weight (Header Details)" />
+                    <ToolbarSpacer />
+                               <Button
+                        text="UPDATE"
+                        press="onUpdate"
+                        icon="sap-icon://save"
+                        type="Attention"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    />
+                    </Toolbar>
                 <f:SimpleForm
                     id="SimpleFormChange456"
                     editable="true"
                     layout="ColumnLayout"
                     columnsM="2"
                     columnsL="2"
-                    columnsXL="3"
-                    title="Enter Weight (Header Details)"
+                    columnsXL="3"                    
                     backgroundDesign="Translucent"
                 >
                     <f:content>
@@ -182,12 +197,12 @@
             </VBox>
 
             <VBox class="sapUiSmallMargin">
+            <Title text="Enter Weight (Item Details)" />
                 <Table
                     id="idItemTable"
                     items="{ItemModel>/results}"
                     growing="true"
-                    growingThreshold="20"
-                    headerText="Enter Weight (Item Details)"
+                    growingThreshold="20"                    
                 >
                     <columns>
                         <Column>
