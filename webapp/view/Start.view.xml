@@ -25,11 +25,15 @@
                             justifyContent="Start"
                             class="sapUiNoMargin sapUiNoPadding"
                         >
-                            <Image
-                                src="images/sfllogoonly.png"
+                            <!-- <Image                               
                                 width="3rem"
-                                class="sapUiSmallMarginEnd"
-                            />
+                                class="logoImage" 
+                            /> -->
+                            <VBox
+    class="logoImage"
+    width="4rem"
+    height="4rem"
+/>
                             <VBox class="sapUiTinyMarginBegin">
                                 <Title
                                     text="SUNDRAM FASTENERS LIMITED"

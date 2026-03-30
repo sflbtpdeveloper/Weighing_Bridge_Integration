@@ -503,6 +503,8 @@ sap.ui.define([
         },
 
         onUpdate: function () {
+            debugger;
+            var that = this;
             var oHeader = this.getView().getModel("TRIPMODEL").getData();
             var aItems = this.getView().getModel("ItemModel").getData().results;
 

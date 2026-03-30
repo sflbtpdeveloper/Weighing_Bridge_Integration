@@ -200,6 +200,8 @@ sap.ui.define([
         _setPoNoItemsForRow: function (oRow) {
             var aAll = this._getAllPurchaseOrders();
             var sPlant = this._getSelectedPlant();
+            var sFirst = oTripModel.getProperty("/Firstwgt");
+            // var sSecond = oTripModel.getProperty("/Secondwgt");
 
             var oUnique = {};
             var aPoNos = [];
@@ -232,6 +234,16 @@ sap.ui.define([
 
             var oUnique = {};
             var aPoItems = [];
+            } 
+            // else if (!sSecond) {
+
+            //     oTripModel.setProperty("/Secondwgt", sWeight);
+
+            // var fFirst = parseFloat(sFirst) || 0;
+            // var fSecond = parseFloat(sSecond) || 0;
+            // var iNet = Math.abs(fFirst - fSecond);
+                // calculate net weight
+                //var iNet = parseFloat(sSecond) - parseFloat(sFirst);
 
             aAll.forEach(function (oItem) {
                 if (sPlant && String(oItem.Plant) !== String(sPlant)) {
@@ -263,6 +275,11 @@ sap.ui.define([
                 oRow.materialItems = [];
                 return;
             }
+                // oTripModel.setProperty("/Netwgt", iNet.toString());
+            // }
+            // else {
+            //     sap.m.MessageToast.show("Both weights already captured");
+            // }
 
             var oUnique = {};
             var aMaterials = [];

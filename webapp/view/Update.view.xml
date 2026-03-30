@@ -31,6 +31,18 @@
                         class="sapUiSmallMarginEnd"
                     />
                     <VBox class="headerTextBox sapUiTinyMarginBegin">
+                    <!-- <Image
+                                src="../images/sfllogoonly.png"
+                                width="3rem"
+                                class="sapUiSmallMarginEnd"
+                            /> -->
+                    <VBox
+                        class="logoImage"
+                        width="4rem"
+                        height="4rem"
+                    />
+                    <!-- <VBox class="headerTextBox sapUiTinyMarginBegin"> -->
+                    <VBox>
                         <Title
                             text="SUNDRAM FASTENERS LIMITED"
                             class="videoHeaderTitle"
@@ -67,6 +79,13 @@
                         type="Accept"
                         enabled="{saveButtonModel>/isSaveEnabled}"
                     />
+                    <!-- <Button
+                        text="UPDATE"
+                        press="onUpdate"
+                        icon="sap-icon://save"
+                        type="Attention"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    /> -->
                 </HBox>
             </Toolbar>
 
@@ -93,14 +112,24 @@
             </VBox>
 
             <VBox class="sapUiSmallMargin">
+              <Toolbar>
+                    <Title text="Enter Weight (Header Details)" />
+                    <ToolbarSpacer />
+                               <Button
+                        text="UPDATE"
+                        press="onUpdate"
+                        icon="sap-icon://save"
+                        type="Attention"
+                        enabled="{saveButtonModel>/isSaveEnabled}"
+                    />
+                    </Toolbar>
                 <f:SimpleForm
                     id="SimpleFormChange456"
                     editable="true"
                     layout="ColumnLayout"
                     columnsM="2"
                     columnsL="2"
-                    columnsXL="3"
-                    title="Enter Weight (Header Details)"
+                    columnsXL="3"                    
                     backgroundDesign="Translucent"
                 >
                     <f:content>
@@ -206,6 +235,18 @@
                 <ToolbarSpacer />
             </Toolbar>
         </headerToolbar>
+            <VBox class="sapUiSmallMargin">
+            <Title text="Enter Weight (Item Details)" />
+                <Table
+                    id="idItemTable"
+                    items="{ItemModel>/results}"
+                    growing="true"
+                    growingThreshold="20"                    
+                >
+                    <columns>
+                        <Column>
+                            <Text text="Serial No" />
+                        </Column>
 
         <columns>
             <Column>
