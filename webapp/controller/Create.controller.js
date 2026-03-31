@@ -24,7 +24,19 @@ sap.ui.define([
             this._initScreen();
             var oItemModel = this.getOwnerComponent().getModel("ItemModel");
             var oTripModel = this.getOwnerComponent().getModel("TRIPMODEL");
+            var sPlant = oTripModel.getProperty("/Plant");
+            var oVendorCombo = this.byId("idVendor");
+            var oBinding = oVendorCombo.getBinding("items");
+            if (oBinding) {
+                var aFilters = [
+                    new sap.ui.model.Filter("Plant", sap.ui.model.FilterOperator.EQ, sPlant)
+                ];
+                oBinding.filter(aFilters);
+            }
             this.getView().setModel(oTripModel, "TRIPMODEL");
+
+            this._loadPurchaseOrders();
+
             if (oItemModel) {
                 this.byId("idItemTable").setModel(oItemModel, "ItemModel");
             }
@@ -103,6 +115,12 @@ sap.ui.define([
                 oTripModel.setData({});
             }
         },
+        onVendorChange: function (oEvent) {
+            var sVendor = oEvent.getSource().getSelectedKey();
+
+            var oTripModel = this.getView().getModel("TRIPMODEL");
+            oTripModel.setProperty("/Supcode", sVendor);
+        },
         onCaptureWeight: function (oEvent) {
             debugger;
             var oLiveModel = this.getView().getModel("liveModel");
@@ -120,7 +138,7 @@ sap.ui.define([
 
                 oTripModel.setProperty("/Firstwgt", sWeight);
 
-            } 
+            }
             // else if (!sSecond) {
 
             //     oTripModel.setProperty("/Secondwgt", sWeight);
@@ -128,14 +146,14 @@ sap.ui.define([
             // var fFirst = parseFloat(sFirst) || 0;
             // var fSecond = parseFloat(sSecond) || 0;
             // var iNet = Math.abs(fFirst - fSecond);
-                // calculate net weight
-                //var iNet = parseFloat(sSecond) - parseFloat(sFirst);
+            // calculate net weight
+            //var iNet = parseFloat(sSecond) - parseFloat(sFirst);
 
-                // if (iNet < 0) {
-                //     iNet = parseFloat(sFirst) - parseFloat(sSecond);
-                // }
+            // if (iNet < 0) {
+            //     iNet = parseFloat(sFirst) - parseFloat(sSecond);
+            // }
 
-                // oTripModel.setProperty("/Netwgt", iNet.toString());
+            // oTripModel.setProperty("/Netwgt", iNet.toString());
             // }
             // else {
             //     sap.m.MessageToast.show("Both weights already captured");
@@ -154,7 +172,9 @@ sap.ui.define([
                 Pono: "",
                 Poitem: "",
                 Matnr: "",
-                Qty: ""
+                Qty: "",
+                poNoItems: [],
+                poItemItems: []
             };
 
         },
@@ -239,9 +259,92 @@ sap.ui.define([
 
 
         },
-        onVendorF4: function(){
-            
-        }
+        onVendorF4: function () {
+
+        },
+_loadPurchaseOrders: function () {
+    var sPlant = this.getView().getModel("TRIPMODEL").getProperty("/Plant");
+
+    var oModel = this.getView().getModel();
+
+    oModel.read("/PurchaseOrders", {
+        filters: [
+            new sap.ui.model.Filter("Plant", "EQ", sPlant)
+        ],
+        success: function (oData) {
+
+            this._poData = oData.results; // store globally
+
+            // assign PO list to each row
+            var oItemModel = this.getView().getModel("ItemModel");
+            var aRows = oItemModel.getProperty("/results");
+
+            aRows.forEach(function (row) {
+                row.poNoItems = oData.results;
+                row.poItemItems = []; // empty initially
+            });
+
+            oItemModel.setProperty("/results", aRows);
+
+        }.bind(this)
+    });
+},
+onPurchaseOrderChange: function (oEvent) {
+
+    var oRowCtx = oEvent.getSource().getBindingContext("ItemModel");
+    var oRow = oRowCtx.getObject();
+
+    var sSelectedPO = oRow.Pono;
+
+    // filter items for this PO
+    var aFilteredItems = this._poData.filter(function (item) {
+        return item.purchaseorderno === sSelectedPO;
+    });
+
+    // set PO items for that row
+    oRow.poItemItems = aFilteredItems;
+
+    // clear previous selections
+    oRow.Poitem = "";
+    oRow.Matnr = "";
+
+    oRowCtx.getModel().refresh();
+},
+onPurchaseOrderItemChange: function (oEvent) {
+
+    var oRowCtx = oEvent.getSource().getBindingContext("ItemModel");
+    var oRow = oRowCtx.getObject();
+
+    var sItem = oRow.Poitem;
+
+    var oSelected = oRow.poItemItems.find(function (item) {
+        return item.purchaseorderitem === sItem;
+    });
+
+    if (oSelected) {
+        oRow.Matnr = oSelected.Material;
+    }
+
+    oRowCtx.getModel().refresh();
+},
+onAddRow: function () {
+
+    var oModel = this.getView().getModel("ItemModel");
+    var aData = oModel.getProperty("/results");
+
+    // create new row
+    var oNewRow = this._createEmptyRow(aData.length + 1);
+
+    // 🔥 IMPORTANT: also assign PO list to new row
+    if (this._poData) {
+        oNewRow.poNoItems = this._poData;
+        oNewRow.poItemItems = [];
+    }
+
+    aData.push(oNewRow);
+
+    oModel.setProperty("/results", aData);
+}        
 
     });
 }

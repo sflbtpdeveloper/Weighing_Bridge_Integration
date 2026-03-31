@@ -160,13 +160,28 @@
                             editable="false"
                         />
                         <Label text="Supplier Code" />
-                        <Input
+                        <!-- <Input
                             id="idSupcode"
                             value="{TRIPMODEL>/Supcode}"
                             editable="true"
                             valueHelpRequest="onVendorF4"
                             showValueHelp="true"
-                        />
+                        /> -->
+                        <ComboBox
+                            id="idVendor"
+                            width="100%"
+                            placeholder="Select Supplier"
+                            selectionChange="onVendorChange"
+                            selectedKey="{TRIPMODEL>/Supcode}"
+                            items="{
+                                        path: '/vendorF4'
+                                    }"
+                        >
+                            <core:Item
+                                key="{Vendor}"
+                                text="{Vendor}"
+                            />
+                        </ComboBox>
 
                         <Label text="First Weight" />
                         <Input
@@ -204,8 +219,15 @@
 
             <VBox class="sapUiSmallMargin">
                 <Toolbar>
-                    <Title text="Enter Weight (Item Details)" />
+                    <Title text="Enter Weight (Item Details)" />                    
                     <ToolbarSpacer />
+            <Button
+                    text="Add Row"
+                    icon="sap-icon://add"
+                    type="Emphasized"
+                    press="onAddRow"
+                    class="sapUiTinyMarginBegin"
+                />                    
                 </Toolbar>
                 <Table
                     id="idItemTable"
@@ -235,7 +257,7 @@
                             <Text text="Material" />
                         </Column>
                         <Column>
-                            <Text text="Quantity/UOM" />
+                            <Text text="Quantity" />
                         </Column>
                         <Column width="80px">
                             <Text text="Delete" />
@@ -258,16 +280,38 @@
                                     change=".onFieldChange"
                                 />
 
-                                <Input
+                                <!-- <Input
                                     value="{ItemModel>Pono}"
                                     liveChange=".onFieldChange"
-                                />
+                                /> -->
 
-                                <Input
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Pono}"
+                                    selectionChange="onPurchaseOrderChange"
+                                    items="{ItemModel>poNoItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderno}"
+                                        text="{ItemModel>purchaseorderno}"
+                                    />
+                                </ComboBox>
+                                <!-- <Input
                                     value="{ItemModel>Poitem}"
                                     liveChange=".onFieldChange"
-                                />
+                                /> -->
 
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Poitem}"
+                                    selectionChange="onPurchaseOrderItemChange"
+                                    items="{ItemModel>poItemItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderitem}"
+                                        text="{ItemModel>purchaseorderitem}"
+                                    />
+                                </ComboBox>
                                 <Input
                                     value="{ItemModel>Matnr}"
                                     liveChange=".onFieldChange"

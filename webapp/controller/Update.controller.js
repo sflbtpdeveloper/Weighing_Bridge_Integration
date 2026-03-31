@@ -24,7 +24,18 @@ sap.ui.define([
             this._initScreen();
             var oItemModel = this.getOwnerComponent().getModel("ItemModel");
             var oTripModel = this.getOwnerComponent().getModel("TRIPMODEL");
+            var sPlant = oTripModel.getProperty("/Plant");
+            var oVendorCombo = this.byId("idVendor");
+            var oBinding = oVendorCombo.getBinding("items");
+            if (oBinding) {
+                var aFilters = [
+                    new sap.ui.model.Filter("Plant", sap.ui.model.FilterOperator.EQ, sPlant)
+                ];
+                oBinding.filter(aFilters);
+            }
             this.getView().setModel(oTripModel, "TRIPMODEL");
+
+            this._loadPurchaseOrders();
             if (oItemModel) {
                 this.byId("idItemTable").setModel(oItemModel, "ItemModel");
             }
@@ -103,6 +114,12 @@ sap.ui.define([
                 oTripModel.setData({});
             }
         },
+        onVendorChange: function (oEvent) {
+            var sVendor = oEvent.getSource().getSelectedKey();
+
+            var oTripModel = this.getView().getModel("TRIPMODEL");
+            oTripModel.setProperty("/Supcode", sVendor);
+        },
         onCaptureWeight: function (oEvent) {
             debugger;
             var oLiveModel = this.getView().getModel("liveModel");
@@ -148,7 +165,9 @@ sap.ui.define([
                 Pono: "",
                 Poitem: "",
                 Matnr: "",
-                Qty: ""
+                Qty: "",
+                poNoItems: [],
+                poItemItems: []
             };
 
         },
@@ -193,55 +212,165 @@ sap.ui.define([
             var oHeader = this.getView().getModel("TRIPMODEL").getData();
             var aItems = this.getView().getModel("ItemModel").getData().results;
 
-            var oItems = aItems.filter(function (item) {
-                return item.Invoiceno && item.Pono && item.Matnr;
-            });
-
             var sPlant = oHeader.Plant;
             var sTripId = oHeader.TripId;
+
+            var oItems = aItems.filter(function (item) {
+                return item.Invoiceno && item.Pono && item.Matnr;
+            })
+                .map(function (item, index) {
+                    return {
+                        Plant: sPlant,
+                        TripId: sTripId,
+                        Sino: (index + 1).toString(),
+                        Invoiceno: item.Invoiceno,
+                        Invoicedt: item.Invoicedt,
+                        Pono: item.Pono,
+                        Poitem: item.Poitem,
+                        Matnr: item.Matnr,
+                        Qty: item.Qty,
+                        Uom: item.Uom
+                    };
+                });
+
+            oHeader.ItemsJson = JSON.stringify(oItems);
+
+
             oItems.forEach(function (item, index) {
 
-                item.Plant = sPlant;
-                item.TripId = sTripId;
+                // item.Plant = sPlant;
+                // item.TripId = sTripId;
                 item.Sino = (index + 1).toString();
 
             });
 
             debugger;
             //oHeader.to_wgtitem = oItems;
-            oHeader.ItemsJson = JSON.stringify(oItems);
+            // oHeader.ItemsJson = JSON.stringify(oItems);
 
             var oModel = this.getView().getModel(); // main OData model
-            var sPath = "/ZC_MGATEWT_HDR(Plant='" + sPlant + "',TripId='" + sTripId + "')";
+            var sHeaderPath = "/ZC_MGATEWT_HDR(Plant='" + sPlant + "',TripId='" + sTripId + "')";
+            console.log("FirstWeight:", oHeader.Firstwgt);
+            console.log("SecondWeight:", oHeader.Secondwgt);
+            console.log("NetWeight:", oHeader.Netwgt);
+            var oHeaderPayload = {
+                Truckno: oHeader.Truckno || "",
+                Supcode: oHeader.Supcode || "",
 
-            debugger;
+                Firstwgt: oHeader.Firstwgt,
+                Refunit: oHeader.Refunit || "KG",
+                // Firstwgtdate: oHeader.Firstwgtdate ? this._formatDate(oHeader.Firstwgtdate) : null,
+                // Firstwgttime: "PT00H00M00S",
 
-            oModel.callFunction("/updateWithItems", {
-                method: "POST",
-                urlParameters:{
-                    Plant: oHeader.Plant,
-                    TripId: oHeader.TripId,
-                    Truckno: oHeader.Truckno,
-                    Supcode: oHeader.Supcode,
-                    Firstwgt: oHeader.Firstwgt,
-                    Refunit: oHeader.Refunit,
-                    Firstwgtdate: oHeader.Firstwgtdate,
-                    Firstwgttime: oHeader.Firstwgttime,
-                    Secondwgt: oHeader.Secondwgt,
-                    Secondwgtdate: oHeader.Secondwgtdate,
-                    Secondwgttime: oHeader.Secondwgttime,
-                    Userid: oHeader.Userid,
-                    Status: oHeader.Status,
-                    Netwgt: oHeader.Netwgt    ,
-                    ItemsJson : oHeader.ItemsJson
-                },
-                success: function (oData,response) {
-                    sap.m.MessageToast.show("Updated Successfully");
-                },
+                Secondwgt: oHeader.Secondwgt,
+                // Secondwgtdate: oHeader.Secondwgtdate ? this._formatDate(oHeader.Secondwgtdate) : null,
+                // Secondwgttime: "PT00H00M00S",
+
+                Userid: oHeader.Userid || "",
+                Status: oHeader.Status || "",
+                Netwgt: oHeader.Netwgt
+            };
+
+            oModel.update(sHeaderPath, oHeaderPayload, {
+                success: function () {
+
+                    this._updateItems(oItems);
+
+                }.bind(this),
+
                 error: function (oError) {
                     console.log(oError);
+                    sap.m.MessageBox.error("Header Update Failed");
                 }
             });
+            debugger;
+            // var payload = {
+            //     Truckno: oHeader.Truckno,
+            //     Supcode: oHeader.Supcode,
+            //     Firstwgt: parseFloat(oHeader.Firstwgt),
+            //     Refunit: oHeader.Refunit,
+            //     Firstwgtdate: this._formatDate(oHeader.Firstwgtdate),
+            //     Firstwgttime: "PT00H00M00S",//oHeader.Firstwgttime,
+            //     Secondwgt: parseFloat(oHeader.Secondwgt || 0),
+            //     Secondwgtdate: this._formatDate(oHeader.Secondwgtdate),//oHeader.Secondwgtdate,
+            //     Secondwgttime: "PT00H00M00S",//oHeader.Secondwgttime,
+            //     Userid: oHeader.Userid,
+            //     Status: oHeader.Status,
+            //     Netwgt: parseFloat(oHeader.Netwgt || 0),
+
+            //     _wgtitem: //oItems
+            //         oItems.map(function (item, index) {
+            //             return {
+            //                 Sino: (index + 1).toString(),
+            //                 Invoiceno: item.Invoiceno,
+            //                 Invoicedt: this._formatDate(item.Invoicedt),
+            //                 Pono: item.Pono,
+            //                 Poitem: item.Poitem,
+            //                 Matnr: item.Matnr,
+            //                 Qty: parseFloat(item.Qty || 0),
+            //                 Uom: item.Uom
+            //             };
+            //         }.bind(this))
+            // };
+
+
+            // oModel.callFunction("/updateWithItems", {
+            //     method: "POST",
+            //     urlParameters: {
+            //         Plant: sPlant,//oHeader.Plant,
+            //         TripId: sTripId,//oHeader.TripId,
+            //         // Truckno: oHeader.Truckno,
+            //         // Supcode: oHeader.Supcode,
+            //         // Firstwgt: oHeader.Firstwgt,
+            //         // Refunit: oHeader.Refunit,
+            //         // Firstwgtdate: oHeader.Firstwgtdate,
+            //         // Firstwgttime: oHeader.Firstwgttime,
+            //         // Secondwgt: oHeader.Secondwgt,
+            //         // Secondwgtdate: oHeader.Secondwgtdate,
+            //         // Secondwgttime: oHeader.Secondwgttime,
+            //         // Userid: oHeader.Userid,
+            //         // Status: oHeader.Status,
+            //         // Netwgt: oHeader.Netwgt,
+            //         // ItemsJson: oHeader.ItemsJson
+            //     },
+            //     payload: payload,
+            //     success: function (oData, response) {
+            //         MessageBox.success("Updated Successfully");
+            //     },
+            //     error: function (oError) {
+            //         console.log(oError);
+            //         debugger;
+            //         var oEText = oError.responseText;
+            //         MessageBox.error("Update Failed", oEText)
+            //     }
+            // });
+
+            // var sPath = "/ZC_MGATEWT_HDR(Plant='" + sPlant + "',TripId='" + sTripId + "')/updateWithItems";
+
+            // oModel.create(sPath, payload, {
+            //     success: function () {
+            //         sap.m.MessageBox.success("Updated Successfully");
+            //     },
+            //     error: function (oError) {
+            //         console.log(oError);
+            //         sap.m.MessageBox.error("Update Failed");
+            //     }
+            // });
+            // oModel.create("/updateWithItems", payload, {
+            //     urlParameters: {
+            //         Plant: "'" + sPlant + "'",
+            //         TripId: "'" + sTripId + "'"
+            //     },
+            //     success: function () {
+            //         sap.m.MessageBox.success("Updated Successfully");
+            //     },
+            //     error: function (oError) {
+            //         console.log(oError);
+            //         sap.m.MessageBox.error("Update Failed");
+            //     }
+            // });
+
+
 
             // oModel.callFunction("/updateWithItems", {
             //     method: "POST",
@@ -293,6 +422,180 @@ sap.ui.define([
             // });
 
 
+        },
+        _updateItems: function (oItems) {
+
+            var oModel = this.getView().getModel();
+            var that = this;
+            var iSuccess = 0;
+            var iError = 0;
+
+            oItems.forEach(function (item, index) {
+
+                var sItemPath = "/ZC_MGATEWT_ITEM(Plant='" + item.Plant +
+                    "',TripId='" + item.TripId +
+                    "',Sino='" + (index + 1).toString() + "')";
+
+                var oItemPayload = {
+                    Invoiceno: item.Invoiceno,
+                    Invoicedt: item.Invoicedt ? that._formatDate(item.Invoicedt, true) : null,
+                    Pono: item.Pono,
+                    Poitem: item.Poitem,
+                    Matnr: item.Matnr,
+                    Qty: item.Qty,
+                    Uom: item.Uom
+                };
+
+                oModel.update(sItemPath, oItemPayload, {
+
+                    success: function () {
+                        iSuccess++;
+
+                        // Final message after all processed
+                        if (iSuccess + iError === oItems.length) {
+                            sap.m.MessageBox.success("Updated Successfully");
+                        }
+                    },
+
+                    error: function (oError) {
+                        console.log(oError);
+                        iError++;
+
+                        if (iSuccess + iError === oItems.length) {
+                            sap.m.MessageBox.error("Some Items Failed to Update");
+                        }
+                    }
+
+                });
+
+            });
+        },
+        _formatDate: function (date) {
+            if (!date) return null;
+            var d = new Date(date);
+            if (isNaN(d)) return null;
+
+            // Edm.DateTime with Precision=0 -> YYYY-MM-DDTHH:mm:ss
+            var yyyy = d.getFullYear();
+            var mm = String(d.getMonth() + 1).padStart(2, '0');
+            var dd = String(d.getDate()).padStart(2, '0');
+            var hh = String(d.getHours()).padStart(2, '0');
+            var mi = String(d.getMinutes()).padStart(2, '0');
+            var ss = String(d.getSeconds()).padStart(2, '0');
+
+            return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
+        },
+        _formatNumber: function (val) {
+            var num = parseFloat(val);
+            return isNaN(num) ? 0 : num;
+        },
+        // _formatDate: function (oDate) {
+        //     if (!oDate) return null;
+
+        //     var d = new Date(oDate);
+        //     var yyyy = d.getFullYear();
+        //     var mm = String(d.getMonth() + 1).padStart(2, '0');
+        //     var dd = String(d.getDate()).padStart(2, '0');
+
+        //     return yyyy + "-" + mm + "-" + dd;
+        // },
+        _loadPurchaseOrders: function () {
+            var sPlant = this.getView().getModel("TRIPMODEL").getProperty("/Plant");
+
+            var oModel = this.getView().getModel();
+
+            oModel.read("/PurchaseOrders", {
+                filters: [
+                    new sap.ui.model.Filter("Plant", "EQ", sPlant)
+                ],
+                success: function (oData) {
+
+                    this._poData = oData.results; // store globally
+
+                    // assign PO list to each row
+                    var oItemModel = this.getView().getModel("ItemModel");
+                    var aRows = oItemModel.getProperty("/results");
+
+                    aRows.forEach(function (row) {
+                        row.poNoItems = oData.results;
+                        // if a PONO is already saved, assign corresponding PO items
+                        if (row.Pono) {
+                            row.poItemItems = oData.results.filter(function (po) {
+                                return po.purchaseorderno === row.Pono;
+                            });
+                            if (row.Poitem) {
+                                var selItem = row.poItemItems.find(function (po) {
+                                    return po.purchaseorderitem === row.Poitem;
+                                });
+                                if (selItem) {
+                                    row.Matnr = selItem.Material;
+                                }
+                            }
+                        } else {
+                            row.poItemItems = [];
+                        }
+                    });
+
+                    oItemModel.setProperty("/results", aRows);
+
+                }.bind(this)
+            });
+        },
+        onPurchaseOrderChange: function (oEvent) {
+
+            var oRowCtx = oEvent.getSource().getBindingContext("ItemModel");
+            var oRow = oRowCtx.getObject();
+
+            var sSelectedPO = oRow.Pono;
+
+            // filter items for this PO
+            var aFilteredItems = this._poData.filter(function (item) {
+                return item.purchaseorderno === sSelectedPO;
+            });
+
+            // set PO items for that row
+            oRow.poItemItems = aFilteredItems;
+
+            // clear previous selections
+            oRow.Poitem = "";
+            oRow.Matnr = "";
+
+            oRowCtx.getModel().refresh();
+        },
+        onPurchaseOrderItemChange: function (oEvent) {
+
+            var oRowCtx = oEvent.getSource().getBindingContext("ItemModel");
+            var oRow = oRowCtx.getObject();
+
+            var sItem = oRow.Poitem;
+
+            var oSelected = oRow.poItemItems.find(function (item) {
+                return item.purchaseorderitem === sItem;
+            });
+
+            if (oSelected) {
+                oRow.Matnr = oSelected.Material;
+            }
+
+            oRowCtx.getModel().refresh();
+        },
+        onAddRow: function () {
+
+            var oModel = this.getView().getModel("ItemModel");
+            var aData = oModel.getProperty("/results");
+
+            // create new row
+            var oNewRow = this._createEmptyRow(aData.length + 1);
+
+            // 🔥 IMPORTANT: also assign PO list to new row
+            if (this._poData) {
+                oNewRow.poNoItems = this._poData;
+                oNewRow.poItemItems = [];
+            }
+
+            aData.push(oNewRow);
+
+            oModel.setProperty("/results", aData);
         }
 
     });

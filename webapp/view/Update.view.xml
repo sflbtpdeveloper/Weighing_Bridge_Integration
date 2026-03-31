@@ -97,24 +97,24 @@
                 />
             </VBox>
             <VBox class="sapUiSmallMargin">
-              <Toolbar>
+                <Toolbar>
                     <Title text="Enter Weight (Header Details)" />
                     <ToolbarSpacer />
-                               <Button
+                    <Button
                         text="UPDATE"
                         press="onUpdate"
                         icon="sap-icon://save"
                         type="Attention"
                         enabled="{saveButtonModel>/isSaveEnabled}"
                     />
-                    </Toolbar>
+                </Toolbar>
                 <f:SimpleForm
                     id="SimpleFormChange456"
                     editable="true"
                     layout="ColumnLayout"
                     columnsM="2"
                     columnsL="2"
-                    columnsXL="3"                    
+                    columnsXL="3"
                     backgroundDesign="Translucent"
                 >
                     <f:content>
@@ -154,12 +154,27 @@
                             editable="false"
                         />
                         <Label text="Supplier Code" />
-                        <Input
+                        <!-- <Input
                             id="idSupcode"
                             value="{TRIPMODEL>/Supcode}"
                             editable="true"
-                        />
+                        /> -->
 
+                        <ComboBox
+                            id="idVendor"
+                            width="100%"
+                            placeholder="Select Supplier"
+                            selectionChange="onVendorChange"
+                            selectedKey="{TRIPMODEL>/Supcode}"
+                            items="{
+                                        path: '/vendorF4'
+                                    }"
+                        >
+                            <core:Item
+                                key="{Vendor}"
+                                text="{Vendor}"
+                            />
+                        </ComboBox>
                         <Label text="First Weight" />
                         <Input
                             id="idFW"
@@ -197,12 +212,22 @@
             </VBox>
 
             <VBox class="sapUiSmallMargin">
-            <Title text="Enter Weight (Item Details)" />
+                <Toolbar>
+                    <Title text="Enter Weight (Item Details)" />
+                    <ToolbarSpacer />
+                    <Button
+                        text="Add Row"
+                        icon="sap-icon://add"
+                        type="Emphasized"
+                        press="onAddRow"
+                        class="sapUiTinyMarginBegin"
+                    />
+                </Toolbar>
                 <Table
                     id="idItemTable"
                     items="{ItemModel>/results}"
                     growing="true"
-                    growingThreshold="20"                    
+                    growingThreshold="20"
                 >
                     <columns>
                         <Column>
@@ -226,7 +251,7 @@
                             <Text text="Material" />
                         </Column>
                         <Column>
-                            <Text text="Quantity/UOM" />
+                            <Text text="Quantity" />
                         </Column>
                         <Column width="80px">
                             <Text text="Delete" />
@@ -249,15 +274,37 @@
                                     change=".onFieldChange"
                                 />
 
-                                <Input
+                                <!-- <Input
                                     value="{ItemModel>Pono}"
                                     liveChange=".onFieldChange"
-                                />
-
-                                <Input
+                                /> -->
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Pono}"
+                                    selectionChange="onPurchaseOrderChange"
+                                    items="{ItemModel>poNoItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderno}"
+                                        text="{ItemModel>purchaseorderno}"
+                                    />
+                                </ComboBox>
+                                <!-- <Input
                                     value="{ItemModel>Poitem}"
                                     liveChange=".onFieldChange"
-                                />
+                                /> -->
+
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{ItemModel>Poitem}"
+                                    selectionChange="onPurchaseOrderItemChange"
+                                    items="{ItemModel>poItemItems}"
+                                >
+                                    <core:Item
+                                        key="{ItemModel>purchaseorderitem}"
+                                        text="{ItemModel>purchaseorderitem}"
+                                    />
+                                </ComboBox>
 
                                 <Input
                                     value="{ItemModel>Matnr}"
